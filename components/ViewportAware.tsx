@@ -39,7 +39,7 @@ export const ViewportAware: React.FC<ViewportAwareProps> = ({
     <div 
       ref={containerRef} 
       className={className}
-      style={{ minHeight: isVisible ? 'auto' : placeholderHeight }}
+      style={{ minHeight: placeholderHeight }}
     >
       {isVisible ? children : null}
     </div>
