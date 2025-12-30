@@ -5,20 +5,22 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    minify: 'esbuild',
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) return 'vendor-core';
-            if (id.includes('recharts')) return 'vendor-charts';
-            if (id.includes('lucide-react')) return 'vendor-ui';
-            return 'vendor-others';
-          }
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          'ui-vendor': ['lucide-react', 'recharts'],
         },
       },
     },
-    chunkSizeWarningLimit: 600,
-    cssCodeSplit: true,
-    // Menghapus minify: 'terser' agar menggunakan default esbuild yang sudah include di Vite
+    chunkSizeWarningLimit: 1000,
   },
+  server: {
+    port: 8080,
+    strictPort: true,
+  }
 });

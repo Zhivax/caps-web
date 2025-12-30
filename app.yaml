@@ -1,0 +1,18 @@
+
+runtime: nodejs20
+env: standard
+
+handlers:
+  # Melayani file statis (Assets)
+  - url: /assets
+    static_dir: dist/assets
+
+  # Melayani file statis root (favicon, dll)
+  - url: /(.*\.(js|css|png|jpg|svg|ico))$
+    static_files: dist/\1
+    upload: dist/.*\.(js|css|png|jpg|svg|ico)$
+
+  # Catch-all untuk SPA Routing
+  - url: /.*
+    static_files: dist/index.html
+    upload: dist/index.html
