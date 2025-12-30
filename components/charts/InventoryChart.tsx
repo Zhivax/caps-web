@@ -11,7 +11,7 @@ interface ChartData {
 
 const InventoryChart: React.FC<{ data: ChartData[] }> = memo(({ data }) => {
   return (
-    <div className="flex flex-col h-full animate-in fade-in duration-500">
+    <div className="flex flex-col h-[450px] animate-in fade-in duration-500">
       <div className="flex items-center justify-between mb-8">
         <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center">
           <TrendingUp size={18} className="mr-3 text-indigo-600" /> 

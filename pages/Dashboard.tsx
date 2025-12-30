@@ -90,11 +90,11 @@ export const Dashboard: React.FC = () => {
           <StatCard title="Low Stock Items" value={lowStockAlerts} icon={<AlertTriangle size={20} />} color="bg-rose-600" />
         </div>
 
-        <ViewportAware placeholderHeight="450px" className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col">
-          <Suspense fallback={<div className="h-full w-full flex items-center justify-center opacity-20"><RefreshCw className="animate-spin" /></div>}>
+        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+          <Suspense fallback={<div className="h-[400px] w-full flex items-center justify-center opacity-20"><RefreshCw className="animate-spin" /></div>}>
             <InventoryChart data={chartData} />
           </Suspense>
-        </ViewportAware>
+        </div>
 
         <ViewportAware placeholderHeight="300px" className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
            <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-8 flex items-center">
