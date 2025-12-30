@@ -1,10 +1,24 @@
 
-import React, { useState, useMemo, Suspense, lazy } from 'react';
+import React, { useState, useMemo, Suspense, lazy, memo } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Search, ChevronLeft, ChevronRight, Plus, BadgeDollarSign, ShoppingCart, RefreshCw } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Plus, BadgeDollarSign } from 'lucide-react';
 
 // Lazy load modal untuk mengurangi beban runtime halaman Sales
 const SalesTransactionModal = lazy(() => import('./components/SalesTransactionModal'));
+
+const SaleRow = memo(({ sale }: { sale: any }) => (
+  <tr className="hover:bg-slate-50/50 transition-colors">
+    <td className="px-8 py-5">
+      <p className="text-[11px] font-black text-slate-800">{new Date(sale.date).toLocaleDateString()}</p>
+      <p className="text-[9px] font-bold text-indigo-400 uppercase">{sale.trackingNumber}</p>
+    </td>
+    <td className="px-8 py-5 text-xs font-black text-slate-700">{sale.productName}</td>
+    <td className="px-8 py-5 text-sm font-black text-slate-900">{sale.quantity} pcs</td>
+    <td className="px-8 py-5 text-right">
+      <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[9px] font-black uppercase">Completed</span>
+    </td>
+  </tr>
+));
 
 export const Sales: React.FC = () => {
   const { hijabSales } = useApp();
@@ -20,7 +34,10 @@ export const Sales: React.FC = () => {
     ), [hijabSales, searchTerm]);
 
   const totalPages = Math.ceil(filteredSales.length / itemsPerPage);
-  const paginatedSales = filteredSales.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  
+  const paginatedSales = useMemo(() => 
+    filteredSales.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  , [filteredSales, currentPage]);
 
   return (
     <div className="space-y-6 animate-in fade-in">
@@ -51,7 +68,7 @@ export const Sales: React.FC = () => {
       <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden h-[600px] flex flex-col">
         <div className="flex-1 overflow-auto">
           <table className="w-full text-left">
-            <thead className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase border-b">
+            <thead className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase border-b sticky top-0 z-10">
               <tr>
                 <th className="px-8 py-5">Date & Invoice</th>
                 <th className="px-8 py-5">Product</th>
@@ -66,17 +83,7 @@ export const Sales: React.FC = () => {
                 </tr>
               ) : (
                 paginatedSales.map(sale => (
-                  <tr key={sale.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-8 py-5">
-                      <p className="text-[11px] font-black text-slate-800">{new Date(sale.date).toLocaleDateString()}</p>
-                      <p className="text-[9px] font-bold text-indigo-400 uppercase">{sale.trackingNumber}</p>
-                    </td>
-                    <td className="px-8 py-5 text-xs font-black text-slate-700">{sale.productName}</td>
-                    <td className="px-8 py-5 text-sm font-black text-slate-900">{sale.quantity} pcs</td>
-                    <td className="px-8 py-5 text-right">
-                      <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[9px] font-black uppercase">Completed</span>
-                    </td>
-                  </tr>
+                  <SaleRow key={sale.id} sale={sale} />
                 ))
               )}
             </tbody>
@@ -85,8 +92,8 @@ export const Sales: React.FC = () => {
         <div className="px-8 py-5 border-t flex justify-between items-center bg-slate-50/50">
            <span className="text-[9px] font-black text-slate-400 uppercase">Page {currentPage} of {totalPages || 1}</span>
            <div className="flex gap-2">
-             <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} disabled={currentPage === 1} className="p-2 rounded-xl border bg-white disabled:opacity-30"><ChevronLeft size={16}/></button>
-             <button onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} disabled={currentPage === totalPages} className="p-2 rounded-xl border bg-white disabled:opacity-30"><ChevronRight size={16}/></button>
+             <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} disabled={currentPage === 1} className="p-2 rounded-xl border bg-white disabled:opacity-30 transition-opacity"><ChevronLeft size={16}/></button>
+             <button onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} disabled={currentPage === totalPages || totalPages === 0} className="p-2 rounded-xl border bg-white disabled:opacity-30 transition-opacity"><ChevronRight size={16}/></button>
            </div>
         </div>
       </div>

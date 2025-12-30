@@ -1,5 +1,5 @@
 
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useMemo, memo } from 'react';
 import { useApp } from '../context/AppContext';
 import { UserRole, RequestStatus } from '../types';
 import { 
@@ -16,6 +16,7 @@ import {
   History as HistoryIcon,
   LayoutDashboard
 } from 'lucide-react';
+import { ViewportAware } from '../components/ViewportAware';
 
 // Dynamically import the chart to isolate Recharts dependency
 const InventoryChart = lazy(() => import('../components/charts/InventoryChart'));
@@ -27,7 +28,7 @@ const StatCard: React.FC<{
   trend?: string; 
   trendUp?: boolean;
   color: string;
-}> = ({ title, value, icon, trend, trendUp, color }) => (
+}> = memo(({ title, value, icon, trend, trendUp, color }) => (
   <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
     <div className="flex items-center justify-between mb-4">
       <div className={`p-3 rounded-2xl ${color} text-white shadow-lg`}>
@@ -42,16 +43,21 @@ const StatCard: React.FC<{
     <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">{title}</p>
     <h3 className="text-2xl font-black text-slate-800 tracking-tight">{value}</h3>
   </div>
-);
+));
 
 export const Dashboard: React.FC = () => {
   const { user, fabrics, requests, hijabProducts, isLoading } = useApp();
 
   const isUMKM = user?.role === UserRole.UMKM;
 
-  if (isLoading) {
-    return null; // Menghilangkan loading screen awal
-  }
+  const chartData = useMemo(() => 
+    hijabProducts.map(p => ({
+      name: p.name,
+      stock: p.stock,
+      threshold: p.threshold
+    })), [hijabProducts]);
+
+  if (isLoading) return null;
 
   const renderHeader = () => (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -73,12 +79,6 @@ export const Dashboard: React.FC = () => {
     const pendingRequests = requests.filter(r => r.status === RequestStatus.PENDING).length;
     const lowStockAlerts = hijabProducts.filter(p => p.stock < p.threshold).length;
 
-    const chartData = hijabProducts.map(p => ({
-      name: p.name,
-      stock: p.stock,
-      threshold: p.threshold
-    }));
-
     return (
       <div className="space-y-8 animate-in fade-in duration-300">
         {renderHeader()}
@@ -90,20 +90,18 @@ export const Dashboard: React.FC = () => {
           <StatCard title="Low Stock Items" value={lowStockAlerts} icon={<AlertTriangle size={20} />} color="bg-rose-600" />
         </div>
 
-        <div className="grid grid-cols-1 gap-8">
-          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col min-h-[450px]">
-            <Suspense fallback={null}>
-              <InventoryChart data={chartData} />
-            </Suspense>
-          </div>
-        </div>
+        <ViewportAware placeholderHeight="450px" className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col">
+          <Suspense fallback={<div className="h-full w-full flex items-center justify-center opacity-20"><RefreshCw className="animate-spin" /></div>}>
+            <InventoryChart data={chartData} />
+          </Suspense>
+        </ViewportAware>
 
-        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+        <ViewportAware placeholderHeight="300px" className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
            <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-8 flex items-center">
               <ClockIcon size={18} className="mr-3 text-amber-600" /> Partner Fabric Catalog Status
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {fabrics.slice(0, 6).map(f => (
+              {fabrics.slice(0, 9).map(f => (
                 <div key={f.id} className="flex items-center justify-between p-5 rounded-3xl bg-slate-50 border border-slate-100 hover:border-indigo-200 transition-colors group">
                   <div className="min-w-0">
                     <p className="text-xs font-black text-slate-800 truncate">{f.name}</p>
@@ -118,7 +116,7 @@ export const Dashboard: React.FC = () => {
                 </div>
               ))}
             </div>
-        </div>
+        </ViewportAware>
       </div>
     );
   } else {
@@ -140,7 +138,7 @@ export const Dashboard: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+          <ViewportAware placeholderHeight="400px" className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
             <div className="flex items-center justify-between mb-8">
               <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">Incoming Fabric Requests</h4>
               <div className="flex gap-2">
@@ -168,9 +166,9 @@ export const Dashboard: React.FC = () => {
                 ))}
               </div>
             )}
-          </div>
+          </ViewportAware>
 
-          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+          <ViewportAware placeholderHeight="400px" className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
             <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-8">Warehouse Inventory Status</h4>
             <div className="space-y-6">
               {myFabrics.map(f => (
@@ -191,7 +189,7 @@ export const Dashboard: React.FC = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </ViewportAware>
         </div>
       </div>
     );

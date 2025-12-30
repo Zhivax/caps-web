@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { User, Fabric, HijabProduct, FabricRequest, UserRole, RequestStatus, UMKMStoreFabric, AppNotification, HijabSale, UsageLog } from '../types';
 import { ApiService } from '../services/api';
 
@@ -81,7 +81,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     localStorage.setItem('sc_usage_history', JSON.stringify(usageHistory));
   }, [user, umkmFabrics, notifications, usageHistory]);
 
-  const addNotification = (userId: string, title: string, message: string, type: AppNotification['type']) => {
+  const addNotification = useCallback((userId: string, title: string, message: string, type: AppNotification['type']) => {
     const newNotif: AppNotification = {
       id: `n-${Date.now()}`,
       userId,
@@ -92,9 +92,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       timestamp: new Date().toISOString()
     };
     setNotifications(prev => [newNotif, ...prev]);
-  };
+  }, []);
 
-  const login = async (email: string) => {
+  const login = useCallback(async (email: string) => {
     setIsLoading(true);
     const userData = await ApiService.login(email);
     setIsLoading(false);
@@ -103,14 +103,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return true;
     }
     return false;
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     localStorage.removeItem('sc_user');
-  };
+  }, []);
 
-  const recordSale = async (saleData: Omit<HijabSale, 'id' | 'timestamp'>) => {
+  const recordSale = useCallback(async (saleData: Omit<HijabSale, 'id' | 'timestamp'>) => {
     const product = hijabProducts.find(p => p.id === saleData.productId);
     if (!product || product.stock < saleData.quantity) {
       throw new Error("Insufficient stock available for this transaction.");
@@ -125,9 +125,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     await ApiService.updateHijabProduct(updatedProduct);
     setHijabSales(prev => [newSale, ...prev]);
     setHijabProducts(prev => prev.map(p => p.id === product.id ? updatedProduct : p));
-  };
+  }, [hijabProducts]);
 
-  const submitRequest = async (reqData: Omit<FabricRequest, 'id' | 'status' | 'timestamp' | 'umkmName'>) => {
+  const submitRequest = useCallback(async (reqData: Omit<FabricRequest, 'id' | 'status' | 'timestamp' | 'umkmName'>) => {
     const newRequest: FabricRequest = {
       ...reqData,
       id: `r-${Date.now()}`,
@@ -138,21 +138,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     await ApiService.saveRequest(newRequest);
     setRequests(prev => [newRequest, ...prev]);
     addNotification(reqData.supplierId, 'New Material Order!', `${user?.name} submitted an order.`, 'info');
-  };
+  }, [user, addNotification]);
 
-  const uploadPaymentProof = async (requestId: string, proofBase64: string) => {
+  const uploadPaymentProof = useCallback(async (requestId: string, proofBase64: string) => {
     const req = requests.find(r => r.id === requestId);
     if (!req) return;
     
-    const updatedRequests = requests.map(r => 
+    setRequests(prev => prev.map(r => 
       r.id === requestId ? { ...r, paymentProof: proofBase64, status: RequestStatus.WAITING_VERIFICATION } : r
-    );
-    setRequests(updatedRequests);
-    localStorage.setItem('sc_requests', JSON.stringify(updatedRequests));
+    ));
     addNotification(req.supplierId, 'Payment Proof Uploaded', `${user?.name} has uploaded proof for #${requestId.slice(-4)}`, 'info');
-  };
+  }, [requests, user, addNotification]);
 
-  const updateRequestStatus = async (requestId: string, status: RequestStatus) => {
+  const updateRequestStatus = useCallback(async (requestId: string, status: RequestStatus) => {
     const req = requests.find(r => r.id === requestId);
     if (!req) return;
 
@@ -186,14 +184,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       });
       addNotification(req.umkmId, 'Materials Received', `${req.fabricName} (${req.fabricColor}) added to local stock.`, 'success');
     }
-  };
+  }, [requests, fabrics, addNotification]);
 
-  const updateFabric = async (fabricId: string, updates: Partial<Fabric>) => {
+  const updateFabric = useCallback(async (fabricId: string, updates: Partial<Fabric>) => {
     await ApiService.updateFabric(fabricId, updates);
     setFabrics(prev => prev.map(f => f.id === fabricId ? { ...f, ...updates } : f));
-  };
+  }, []);
 
-  const produceExistingHijab = async (productId: string, quantity: number, fabricUsed: number) => {
+  const produceExistingHijab = useCallback(async (productId: string, quantity: number, fabricUsed: number) => {
     const product = hijabProducts.find(p => p.id === productId);
     if (!product) throw new Error("Product not found.");
 
@@ -218,9 +216,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const updatedProduct = { ...product, stock: product.stock + quantity };
     await ApiService.updateHijabProduct(updatedProduct);
     setHijabProducts(prev => prev.map(p => p.id === productId ? updatedProduct : p));
-  };
+  }, [hijabProducts, umkmFabrics]);
 
-  const addHijabProduct = async (productData: Omit<HijabProduct, 'id' | 'umkmId'>, fabricUsed: number) => {
+  const addHijabProduct = useCallback(async (productData: Omit<HijabProduct, 'id' | 'umkmId'>, fabricUsed: number) => {
     const fabric = umkmFabrics.find(f => f.fabricId === productData.fabricId);
     if (!fabric || fabric.quantity < fabricUsed) {
       throw new Error("Insufficient raw materials in warehouse.");
@@ -244,19 +242,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     await ApiService.updateHijabProduct(newProduct);
     setHijabProducts(prev => [...prev, newProduct]);
     setUmkmFabrics(prev => prev.map(uf => uf.fabricId === productData.fabricId ? { ...uf, quantity: Number((uf.quantity - fabricUsed).toFixed(2)) } : uf));
-  };
+  }, [user, umkmFabrics]);
 
-  const addFabric = async (fabricData: Omit<Fabric, 'id' | 'supplierId' | 'supplierName'>) => {
+  const addFabric = useCallback(async (fabricData: Omit<Fabric, 'id' | 'supplierId' | 'supplierName'>) => {
     const newFabric = { ...fabricData, id: `f-${Date.now()}`, supplierId: user!.id, supplierName: user!.name };
     const currentFabrics = await ApiService.getFabrics();
     const updatedFabrics = [...currentFabrics, newFabric];
     localStorage.setItem('sc_fabrics', JSON.stringify(updatedFabrics));
     setFabrics(updatedFabrics);
-  };
+  }, [user]);
 
-  const markNotificationsAsRead = () => {
+  const markNotificationsAsRead = useCallback(() => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-  };
+  }, []);
 
   return (
     <AppContext.Provider value={{ 

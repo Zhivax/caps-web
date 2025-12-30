@@ -16,6 +16,7 @@ const SupplierInventory = lazy(() => import('./pages/supplier/InventoryList').th
 const SupplierAddFabric = lazy(() => import('./pages/supplier/AddFabric').then(m => ({ default: m.AddFabric })));
 const SupplierRequests = lazy(() => import('./pages/supplier/Requests').then(m => ({ default: m.Requests })));
 const History = lazy(() => import('./pages/History').then(m => ({ default: m.History })));
+const Settings = lazy(() => import('./pages/Settings').then(m => ({ default: m.Settings })));
 
 const Main: React.FC = () => {
   const { user } = useApp();
@@ -29,7 +30,6 @@ const Main: React.FC = () => {
   if (!user) return <Login />;
 
   const handleTabChange = (tab: string) => {
-    // Membungkus perubahan state dalam transition agar halaman lama tidak langsung hilang
     startTransition(() => {
       setActiveTab(tab);
     });
@@ -48,13 +48,14 @@ const Main: React.FC = () => {
       case 'add-fabric': return <SupplierAddFabric />;
       case 'requests': return <SupplierRequests />;
       case 'history': return <History />;
+      case 'settings': return <Settings />;
       default: return <Dashboard />;
     }
   };
 
   return (
     <Layout activeTab={activeTab} setActiveTab={handleTabChange}>
-      <div className={isPending ? "opacity-80 transition-opacity duration-300" : ""}>
+      <div className={isPending ? "opacity-50 transition-opacity duration-200 pointer-events-none" : "transition-opacity duration-200"}>
         <Suspense fallback={null}>
           {renderContent()}
         </Suspense>

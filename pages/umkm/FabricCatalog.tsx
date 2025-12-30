@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, memo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Fabric } from '../../types';
 import { 
@@ -10,6 +10,37 @@ import {
   X,
   ShoppingCart as CatalogIcon
 } from 'lucide-react';
+import { ViewportAware } from '../../components/ViewportAware';
+
+const FabricCard = memo(({ f, onOrder }: { f: Fabric, onOrder: (f: Fabric) => void }) => (
+  <div className="bg-white rounded-[2.5rem] border border-slate-100 p-6 flex flex-col group hover:shadow-xl transition-all h-full">
+    <div className="mb-4">
+      <div className="text-[9px] text-slate-400 font-black flex items-center uppercase tracking-[0.2em] mb-1">
+        <Building2 size={12} className="mr-1.5" />{f.supplierName}
+      </div>
+      <p className="text-slate-800 font-black text-lg leading-tight">{f.name}</p>
+      <span className="inline-block mt-2 px-2.5 py-0.5 bg-slate-50 rounded-lg text-[9px] font-black text-slate-400 uppercase tracking-widest">{f.type}</span>
+    </div>
+    <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center gap-2">
+        <div className="w-3.5 h-3.5 rounded-full border border-slate-200 shadow-inner" style={{ backgroundColor: f.color.replace(/\s/g, '').toLowerCase() }}></div>
+        <span className="text-xs font-bold text-slate-500">{f.color}</span>
+      </div>
+      <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-tighter ${f.stock < 50 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
+          {f.stock}m Available
+      </span>
+    </div>
+    <div className="mt-auto pt-6 border-t border-slate-50 flex items-center justify-between">
+      <div>
+        <p className="text-[8px] font-black text-slate-300 uppercase leading-none mb-1">Price / m</p>
+        <p className="font-black text-slate-900 text-xl">Rp {f.pricePerUnit.toLocaleString()}</p>
+      </div>
+      <button onClick={() => onOrder(f)} className="p-3.5 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95">
+        <ShoppingCart size={18} />
+      </button>
+    </div>
+  </div>
+));
 
 export const FabricCatalog: React.FC = () => {
   const { fabrics, user, submitRequest } = useApp();
@@ -21,41 +52,17 @@ export const FabricCatalog: React.FC = () => {
   const [requestQty, setRequestQty] = useState(1);
   const [requestNotes, setRequestNotes] = useState('');
 
-  // Search logic: Strictly for fabric name only
-  const filteredFabrics = fabrics.filter(f => {
+  const filteredFabrics = useMemo(() => fabrics.filter(f => {
     const matchesSearch = f.name.toLowerCase().includes(searchTerm.toLowerCase());
-      
     const matchesType = filterType === 'All Types' || f.type === filterType;
     const matchesColor = filterColor === 'All Colors' || f.color === filterColor;
     const matchesSupplier = filterSupplier === 'All Suppliers' || f.supplierName === filterSupplier;
-    
     return matchesSearch && matchesType && matchesColor && matchesSupplier;
-  });
+  }), [fabrics, searchTerm, filterType, filterColor, filterSupplier]);
 
-  // Smart/Cascading Filters
-  const availableTypes = useMemo(() => {
-    const filteredForTypes = fabrics.filter(f => 
-      (filterColor === 'All Colors' || f.color === filterColor) && 
-      (filterSupplier === 'All Suppliers' || f.supplierName === filterSupplier)
-    );
-    return ['All Types', ...new Set(filteredForTypes.map(f => f.type))];
-  }, [fabrics, filterColor, filterSupplier]);
-
-  const availableColors = useMemo(() => {
-    const filteredForColors = fabrics.filter(f => 
-      (filterType === 'All Types' || f.type === filterType) && 
-      (filterSupplier === 'All Suppliers' || f.supplierName === filterSupplier)
-    );
-    return ['All Colors', ...new Set(filteredForColors.map(f => f.color))];
-  }, [fabrics, filterType, filterSupplier]);
-
-  const availableSuppliers = useMemo(() => {
-    const filteredForSuppliers = fabrics.filter(f => 
-      (filterType === 'All Types' || f.type === filterType) && 
-      (filterColor === 'All Colors' || f.color === filterColor)
-    );
-    return ['All Suppliers', ...new Set(filteredForSuppliers.map(f => f.supplierName))];
-  }, [fabrics, filterType, filterColor]);
+  const availableTypes = useMemo(() => ['All Types', ...new Set(fabrics.map(f => f.type))], [fabrics]);
+  const availableColors = useMemo(() => ['All Colors', ...new Set(fabrics.map(f => f.color))], [fabrics]);
+  const availableSuppliers = useMemo(() => ['All Suppliers', ...new Set(fabrics.map(f => f.supplierName))], [fabrics]);
 
   const handleRequestSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +71,6 @@ export const FabricCatalog: React.FC = () => {
       alert('Request quantity exceeds available stock!');
       return;
     }
-    /* Passing supplierName from selectedFabric to satisfy FabricRequest interface requirements */
     submitRequest({
       umkmId: user.id,
       supplierId: selectedFabric.supplierId,
@@ -83,7 +89,6 @@ export const FabricCatalog: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h3 className="text-lg font-black text-slate-800 uppercase tracking-widest flex items-center gap-3">
@@ -94,7 +99,6 @@ export const FabricCatalog: React.FC = () => {
         </div>
       </div>
 
-      {/* Top Bar with Search & Filters */}
       <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col xl:flex-row xl:items-center gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -134,53 +138,21 @@ export const FabricCatalog: React.FC = () => {
         </div>
       </div>
 
-      {/* Catalog Grid */}
       {filteredFabrics.length === 0 ? (
         <div className="bg-white rounded-[2rem] border border-dashed border-slate-200 p-24 text-center">
             <Package size={48} className="mx-auto mb-4 text-slate-200" />
             <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No fabrics match your search/filters</p>
-            <button 
-              onClick={() => { setFilterType('All Types'); setFilterColor('All Colors'); setFilterSupplier('All Suppliers'); setSearchTerm(''); }}
-              className="mt-4 text-indigo-600 text-[10px] font-black uppercase tracking-widest hover:underline"
-            >
-              Reset All Filters
-            </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredFabrics.map(f => (
-            <div key={f.id} className="bg-white rounded-[2.5rem] border border-slate-100 p-6 flex flex-col group hover:shadow-xl transition-all">
-              <div className="mb-4">
-                <div className="text-[9px] text-slate-400 font-black flex items-center uppercase tracking-[0.2em] mb-1">
-                  <Building2 size={12} className="mr-1.5" />{f.supplierName}
-                </div>
-                <p className="text-slate-800 font-black text-lg leading-tight">{f.name}</p>
-                <span className="inline-block mt-2 px-2.5 py-0.5 bg-slate-50 rounded-lg text-[9px] font-black text-slate-400 uppercase tracking-widest">{f.type}</span>
-              </div>
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2">
-                  <div className="w-3.5 h-3.5 rounded-full border border-slate-200 shadow-inner" style={{ backgroundColor: f.color.replace(/\s/g, '').toLowerCase() }}></div>
-                  <span className="text-xs font-bold text-slate-500">{f.color}</span>
-                </div>
-                <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-tighter ${f.stock < 50 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                    {f.stock}m Available
-                </span>
-              </div>
-              <div className="mt-auto pt-6 border-t border-slate-50 flex items-center justify-between">
-                <div>
-                  <p className="text-[8px] font-black text-slate-300 uppercase leading-none mb-1">Price / m</p>
-                  <p className="font-black text-slate-900 text-xl">Rp {f.pricePerUnit.toLocaleString()}</p>
-                </div>
-                <button onClick={() => setSelectedFabric(f)} className="p-3.5 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95">
-                  <ShoppingCart size={18} />
-                </button>
-              </div>
-            </div>
+            <ViewportAware key={f.id} placeholderHeight="280px">
+              <FabricCard f={f} onOrder={setSelectedFabric} />
+            </ViewportAware>
           ))}
         </div>
       )}
 
-      {/* Order Modal */}
       {selectedFabric && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
           <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
