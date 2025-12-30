@@ -1,0 +1,31 @@
+{
+  "name": "Supply Chain Dashboard",
+  "description": "Supply chain management dashboard for UMKM with Gemini AI integration",
+  "version": "1.0.0",
+  "runtime": {
+    "name": "nodejs",
+    "version": "20"
+  },
+  "env": {
+    "NODE_ENV": {
+      "description": "Node environment",
+      "value": "production",
+      "required": true
+    },
+    "GEMINI_API_KEY": {
+      "description": "Google Gemini API key for AI features",
+      "required": false
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "addons": []
+}
