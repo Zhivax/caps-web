@@ -1,0 +1,149 @@
+
+import React, { useState, useMemo } from 'react';
+import { useApp } from '../../context/AppContext';
+import { CheckCircle, AlertTriangle, Layers, Search } from 'lucide-react';
+
+export const HijabInventory: React.FC = () => {
+  const { hijabProducts } = useApp();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterColor, setFilterColor] = useState('All Colors');
+  const [filterStatus, setFilterStatus] = useState('All Status');
+
+  // Strict contiguous search logic
+  const filteredProducts = useMemo(() => {
+    return hijabProducts.filter(p => {
+      const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesColor = filterColor === 'All Colors' || p.color === filterColor;
+      const isLow = p.stock < p.threshold;
+      const matchesStatus = filterStatus === 'All Status' || 
+                           (filterStatus === 'Good Stock' && !isLow) || 
+                           (filterStatus === 'Low Stock' && isLow);
+      
+      return matchesSearch && matchesColor && matchesStatus;
+    });
+  }, [hijabProducts, searchTerm, filterColor, filterStatus]);
+
+  // Cascading/Smart Filters
+  const availableColors = useMemo(() => {
+    const relevantProducts = hijabProducts.filter(p => {
+      const isLow = p.stock < p.threshold;
+      const matchesStatus = filterStatus === 'All Status' || 
+                           (filterStatus === 'Good Stock' && !isLow) || 
+                           (filterStatus === 'Low Stock' && isLow);
+      return matchesStatus;
+    });
+    return ['All Colors', ...new Set(relevantProducts.map(p => p.color))];
+  }, [hijabProducts, filterStatus]);
+
+  const availableStatuses = useMemo(() => {
+    const relevantProducts = hijabProducts.filter(p => 
+      filterColor === 'All Colors' || p.color === filterColor
+    );
+    const hasGood = relevantProducts.some(p => p.stock >= p.threshold);
+    const hasLow = relevantProducts.some(p => p.stock < p.threshold);
+    
+    const base = ['All Status'];
+    if (hasGood) base.push('Good Stock');
+    if (hasLow) base.push('Low Stock');
+    return base;
+  }, [hijabProducts, filterColor]);
+
+  return (
+    <div className="space-y-6 animate-in fade-in duration-500">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h3 className="text-lg font-black text-slate-800 uppercase tracking-widest flex items-center gap-3">
+            <Layers className="text-indigo-600" size={24} />
+            Hijab Inventory
+          </h3>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 ml-9">Manage your product stock levels and safety limits</p>
+        </div>
+      </div>
+
+      <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col md:flex-row gap-4 items-center">
+        <div className="relative flex-1">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <input 
+            type="text" 
+            placeholder="Search Product SKU..." 
+            className="pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none w-full focus:ring-4 focus:ring-indigo-50 transition-all font-bold text-sm" 
+            value={searchTerm} 
+            onChange={(e) => setSearchTerm(e.target.value)} 
+          />
+        </div>
+        <div className="flex gap-3 shrink-0">
+          <select 
+            className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-bold text-xs text-slate-600 focus:ring-4 focus:ring-indigo-50"
+            value={filterColor}
+            onChange={(e) => setFilterColor(e.target.value)}
+          >
+            {availableColors.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+          <select 
+            className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-bold text-xs text-slate-600 focus:ring-4 focus:ring-indigo-50"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            {availableStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+        <table className="w-full text-left">
+          <thead>
+            <tr className="bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] border-b">
+              <th className="px-8 py-5">Product SKU</th>
+              <th className="px-8 py-5">Color Spec</th>
+              <th className="px-8 py-5">Current Stock</th>
+              <th className="px-8 py-5">Safety Limit</th>
+              <th className="px-8 py-5">Status</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {filteredProducts.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-8 py-20 text-center text-slate-400 font-bold uppercase tracking-widest text-xs opacity-40">No matching products found</td>
+              </tr>
+            ) : (
+              filteredProducts.map((p) => {
+                const isLow = p.stock < p.threshold;
+                return (
+                  <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-8 py-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500"><Layers size={20} /></div>
+                        <span className="font-black text-slate-800 text-sm">{p.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-8 py-5">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3.5 h-3.5 rounded-full border border-slate-200" style={{ backgroundColor: p.color.replace(/\s/g, '').toLowerCase() }}></div>
+                        <span className="text-xs font-bold text-slate-500">{p.color}</span>
+                      </div>
+                    </td>
+                    <td className="px-8 py-5">
+                      <span className={`text-sm font-black ${isLow ? 'text-rose-600' : 'text-slate-800'}`}>{p.stock} pcs</span>
+                    </td>
+                    <td className="px-8 py-5">
+                      <span className="text-xs font-black text-slate-300 uppercase">{p.threshold} Threshold</span>
+                    </td>
+                    <td className="px-8 py-5">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                        isLow ? 'bg-rose-50 text-rose-600 border border-rose-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                      }`}>
+                        {isLow ? <AlertTriangle size={12} className="mr-1.5" /> : <CheckCircle size={12} className="mr-1.5" />}
+                        {isLow ? 'Restock Needed' : 'Healthy'}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
