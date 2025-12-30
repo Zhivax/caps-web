@@ -1,77 +1,72 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy, useTransition } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
-import { UserRole } from './types';
 import { Login } from './pages/Login';
 import { Layout } from './components/Layout';
-import { Dashboard } from './pages/Dashboard';
-import { FabricCatalog } from './pages/umkm/FabricCatalog';
-import { SupplierDirectory } from './pages/umkm/SupplierDirectory';
-import { HijabInventory } from './pages/umkm/HijabInventory';
-import { RawMaterials } from './pages/umkm/RawMaterials';
-import { UsageHistory } from './pages/umkm/UsageHistory';
-import { Sales } from './pages/umkm/Sales';
-import { InventoryList as SupplierInventory } from './pages/supplier/InventoryList';
-import { AddFabric as SupplierAddFabric } from './pages/supplier/AddFabric';
-import { Requests as SupplierRequests } from './pages/supplier/Requests';
-import { History } from './pages/History';
+
+// Lazy loading rute utama
+const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
+const FabricCatalog = lazy(() => import('./pages/umkm/FabricCatalog').then(m => ({ default: m.FabricCatalog })));
+const SupplierDirectory = lazy(() => import('./pages/umkm/SupplierDirectory').then(m => ({ default: m.SupplierDirectory })));
+const HijabInventory = lazy(() => import('./pages/umkm/HijabInventory').then(m => ({ default: m.HijabInventory })));
+const RawMaterials = lazy(() => import('./pages/umkm/RawMaterials').then(m => ({ default: m.RawMaterials })));
+const UsageHistory = lazy(() => import('./pages/umkm/UsageHistory').then(m => ({ default: m.UsageHistory })));
+const Sales = lazy(() => import('./pages/umkm/Sales').then(m => ({ default: m.Sales })));
+const SupplierInventory = lazy(() => import('./pages/supplier/InventoryList').then(m => ({ default: m.InventoryList })));
+const SupplierAddFabric = lazy(() => import('./pages/supplier/AddFabric').then(m => ({ default: m.AddFabric })));
+const SupplierRequests = lazy(() => import('./pages/supplier/Requests').then(m => ({ default: m.Requests })));
+const History = lazy(() => import('./pages/History').then(m => ({ default: m.History })));
 
 const Main: React.FC = () => {
   const { user } = useApp();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     setActiveTab('dashboard');
   }, [user?.id]);
 
-  if (!user) {
-    return <Login />;
-  }
+  if (!user) return <Login />;
+
+  const handleTabChange = (tab: string) => {
+    // Membungkus perubahan state dalam transition agar halaman lama tidak langsung hilang
+    startTransition(() => {
+      setActiveTab(tab);
+    });
+  };
 
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard': return <Dashboard />;
-      // UMKM Sub-menus
       case 'catalog': return <FabricCatalog />;
       case 'directory': return <SupplierDirectory />;
-      
-      // Production & Stock sub-menus
       case 'hijab-inv': return <HijabInventory />;
       case 'raw-materials': return <RawMaterials />;
       case 'usage-history': return <UsageHistory />;
-      
-      // Sales consolidated menu
       case 'sales': return <Sales />;
-      
-      // Supplier Sub-menus
       case 'inventory': return <SupplierInventory />;
       case 'add-fabric': return <SupplierAddFabric />;
-      
       case 'requests': return <SupplierRequests />;
       case 'history': return <History />;
-      case 'settings': return (
-        <div className="p-12 text-center text-slate-400 bg-white border border-dashed border-slate-200 rounded-2xl shadow-sm">
-          <p className="font-medium text-slate-600">User Profile & Preferences</p>
-          <p className="text-sm">Account settings management coming soon.</p>
-        </div>
-      );
       default: return <Dashboard />;
     }
   };
 
   return (
-    <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
-      {renderContent()}
+    <Layout activeTab={activeTab} setActiveTab={handleTabChange}>
+      <div className={isPending ? "opacity-80 transition-opacity duration-300" : ""}>
+        <Suspense fallback={null}>
+          {renderContent()}
+        </Suspense>
+      </div>
     </Layout>
   );
 };
 
-const App: React.FC = () => {
-  return (
-    <AppProvider>
-      <Main />
-    </AppProvider>
-  );
-};
+const App: React.FC = () => (
+  <AppProvider>
+    <Main />
+  </AppProvider>
+);
 
 export default App;
