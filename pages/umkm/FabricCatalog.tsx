@@ -1,5 +1,4 @@
 
-
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Fabric } from '../../types';
@@ -184,7 +183,7 @@ export const FabricCatalog: React.FC = () => {
       {/* Order Modal */}
       {selectedFabric && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
-          <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-sm overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="px-8 py-5 bg-indigo-600 text-white flex items-center justify-between">
               <h4 className="font-black text-[10px] uppercase tracking-widest">Order Material</h4>
               <button onClick={() => setSelectedFabric(null)} className="p-2 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
