@@ -19,6 +19,6 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 600,
     cssCodeSplit: true,
-    minify: 'terser',
+    // Menghapus minify: 'terser' agar menggunakan default esbuild yang sudah include di Vite
   },
 });
