@@ -13,7 +13,7 @@ import {
 import { ViewportAware } from '../../components/ViewportAware';
 
 const FabricCard = memo(({ f, onOrder }: { f: Fabric, onOrder: (f: Fabric) => void }) => (
-  <div className="bg-white rounded-[2.5rem] border border-slate-100 p-6 flex flex-col group hover:shadow-xl transition-all h-full">
+  <div className="bg-white/85 backdrop-blur-xl rounded-[2.5rem] border border-slate-200/70 p-6 flex flex-col group hover:shadow-2xl hover:-translate-y-1 transition-all h-full shadow-lg shadow-indigo-50">
     <div className="mb-4">
       <div className="text-[9px] text-slate-400 font-black flex items-center uppercase tracking-[0.2em] mb-1">
         <Building2 size={12} className="mr-1.5" />{f.supplierName}
@@ -30,12 +30,12 @@ const FabricCard = memo(({ f, onOrder }: { f: Fabric, onOrder: (f: Fabric) => vo
           {f.stock}m Available
       </span>
     </div>
-    <div className="mt-auto pt-6 border-t border-slate-50 flex items-center justify-between">
+    <div className="mt-auto pt-6 border-t border-slate-100/70 flex items-center justify-between">
       <div>
         <p className="text-[8px] font-black text-slate-300 uppercase leading-none mb-1">Price / m</p>
         <p className="font-black text-slate-900 text-xl">Rp {f.pricePerUnit.toLocaleString()}</p>
       </div>
-      <button onClick={() => onOrder(f)} className="p-3.5 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95">
+      <button onClick={() => onOrder(f)} className="p-3.5 bg-gradient-to-r from-indigo-600 to-sky-500 text-white rounded-2xl shadow-xl shadow-indigo-200 hover:from-indigo-700 hover:to-sky-600 transition-all active:scale-95">
         <ShoppingCart size={18} />
       </button>
     </div>
@@ -99,8 +99,8 @@ export const FabricCatalog: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col xl:flex-row xl:items-center gap-4">
-        <div className="relative flex-1">
+      <div className="bg-white/85 backdrop-blur-xl p-6 rounded-[2rem] border border-slate-200/70 shadow-lg shadow-indigo-50 flex flex-col xl:flex-row xl:items-center gap-4">
+         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input 
             type="text" 
@@ -138,12 +138,12 @@ export const FabricCatalog: React.FC = () => {
         </div>
       </div>
 
-      {filteredFabrics.length === 0 ? (
-        <div className="bg-white rounded-[2rem] border border-dashed border-slate-200 p-24 text-center">
-            <Package size={48} className="mx-auto mb-4 text-slate-200" />
-            <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No fabrics match your search/filters</p>
-        </div>
-      ) : (
+       {filteredFabrics.length === 0 ? (
+         <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-dashed border-slate-200 p-24 text-center shadow-inner">
+             <Package size={48} className="mx-auto mb-4 text-slate-200" />
+             <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No fabrics match your search/filters</p>
+         </div>
+       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredFabrics.map(f => (
             <ViewportAware key={f.id} placeholderHeight="280px">
@@ -154,9 +154,9 @@ export const FabricCatalog: React.FC = () => {
       )}
 
       {selectedFabric && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
-          <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="px-8 py-5 bg-indigo-600 text-white flex items-center justify-between">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-md">
+          <div className="bg-white/90 backdrop-blur-2xl border border-slate-200/70 rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-8 py-5 bg-gradient-to-r from-indigo-600 to-sky-500 text-white flex items-center justify-between">
               <h4 className="font-black text-[10px] uppercase tracking-widest">Order Material</h4>
               <button onClick={() => setSelectedFabric(null)} className="p-2 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
             </div>
