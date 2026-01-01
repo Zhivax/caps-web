@@ -49,23 +49,42 @@ sleep 5
 
 # Test the health endpoint
 echo "🏥 Testing health check endpoint..."
-if curl -s http://localhost:${PORT}/health | grep -q "healthy"; then
-    echo -e "${GREEN}✅ Health check passed!${NC}"
+if command -v curl >/dev/null 2>&1; then
+    if curl -s http://localhost:${PORT}/health | grep -q "healthy"; then
+        echo -e "${GREEN}✅ Health check passed!${NC}"
+    else
+        echo -e "${RED}❌ Health check failed!${NC}"
+        echo "Container logs:"
+        docker logs ${CONTAINER_NAME}
+        docker stop ${CONTAINER_NAME}
+        docker rm ${CONTAINER_NAME}
+        exit 1
+    fi
+elif command -v wget >/dev/null 2>&1; then
+    if wget -q -O - http://localhost:${PORT}/health | grep -q "healthy"; then
+        echo -e "${GREEN}✅ Health check passed!${NC}"
+    else
+        echo -e "${RED}❌ Health check failed!${NC}"
+        echo "Container logs:"
+        docker logs ${CONTAINER_NAME}
+        docker stop ${CONTAINER_NAME}
+        docker rm ${CONTAINER_NAME}
+        exit 1
+    fi
 else
-    echo -e "${RED}❌ Health check failed!${NC}"
-    echo "Container logs:"
-    docker logs ${CONTAINER_NAME}
-    docker stop ${CONTAINER_NAME}
-    docker rm ${CONTAINER_NAME}
-    exit 1
+    echo -e "${YELLOW}⚠️  curl/wget not available, skipping health check${NC}"
 fi
 
 echo ""
 echo "🌐 Testing application homepage..."
-if curl -s -o /dev/null -w "%{http_code}" http://localhost:${PORT}/ | grep -q "200"; then
-    echo -e "${GREEN}✅ Homepage is accessible!${NC}"
+if command -v curl >/dev/null 2>&1; then
+    if curl -s -o /dev/null -w "%{http_code}" http://localhost:${PORT}/ | grep -q "200"; then
+        echo -e "${GREEN}✅ Homepage is accessible!${NC}"
+    else
+        echo -e "${YELLOW}⚠️  Homepage returned non-200 status${NC}"
+    fi
 else
-    echo -e "${YELLOW}⚠️  Homepage returned non-200 status${NC}"
+    echo -e "${YELLOW}⚠️  curl not available, skipping homepage test${NC}"
 fi
 
 echo ""
@@ -82,8 +101,14 @@ echo "  docker push gcr.io/YOUR_PROJECT_ID/caps-web:latest"
 echo "  gcloud run deploy caps-web --image gcr.io/YOUR_PROJECT_ID/caps-web:latest --platform managed --region asia-southeast2"
 echo ""
 
-# Prompt to stop container
-read -p "Press Enter to stop and remove test container..."
+# Prompt to stop container (skip in non-interactive mode)
+if [ -t 0 ]; then
+    read -p "Press Enter to stop and remove test container..."
+else
+    echo "Non-interactive mode: cleaning up automatically..."
+    sleep 2
+fi
+
 docker stop ${CONTAINER_NAME}
 docker rm ${CONTAINER_NAME}
 
