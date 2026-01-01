@@ -29,9 +29,9 @@ const StatCard: React.FC<{
   trendUp?: boolean;
   color: string;
 }> = memo(({ title, value, icon, trend, trendUp, color }) => (
-  <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
+  <div className="bg-white/80 backdrop-blur-xl p-6 rounded-3xl border border-slate-200/60 shadow-lg shadow-indigo-50 transition-all hover:-translate-y-0.5 hover:shadow-xl">
     <div className="flex items-center justify-between mb-4">
-      <div className={`p-3 rounded-2xl ${color} text-white shadow-lg`}>
+      <div className={`p-3 rounded-2xl ${color} text-white shadow-lg shadow-indigo-200/50`}>
         {icon}
       </div>
       {trend && (
@@ -90,13 +90,13 @@ export const Dashboard: React.FC = () => {
           <StatCard title="Low Stock Items" value={lowStockAlerts} icon={<AlertTriangle size={20} />} color="bg-rose-600" />
         </div>
 
-        <ViewportAware placeholderHeight="450px" className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col">
+        <ViewportAware placeholderHeight="450px" className="bg-white/85 backdrop-blur-xl p-8 rounded-[2.5rem] border border-slate-200/70 shadow-lg shadow-indigo-50 flex flex-col">
           <Suspense fallback={<div className="h-full w-full flex items-center justify-center opacity-20"><RefreshCw className="animate-spin" /></div>}>
             <InventoryChart data={chartData} />
           </Suspense>
         </ViewportAware>
 
-        <ViewportAware placeholderHeight="300px" className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+        <ViewportAware placeholderHeight="300px" className="bg-white/85 backdrop-blur-xl p-8 rounded-[2.5rem] border border-slate-200/70 shadow-lg shadow-indigo-50">
            <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-8 flex items-center">
               <ClockIcon size={18} className="mr-3 text-amber-600" /> Partner Fabric Catalog Status
             </h4>
@@ -138,7 +138,7 @@ export const Dashboard: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <ViewportAware placeholderHeight="400px" className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+          <ViewportAware placeholderHeight="400px" className="bg-white/85 backdrop-blur-xl p-8 rounded-[2.5rem] border border-slate-200/70 shadow-lg shadow-indigo-50">
             <div className="flex items-center justify-between mb-8">
               <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">Incoming Fabric Requests</h4>
               <div className="flex gap-2">
@@ -168,7 +168,7 @@ export const Dashboard: React.FC = () => {
             )}
           </ViewportAware>
 
-          <ViewportAware placeholderHeight="400px" className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+          <ViewportAware placeholderHeight="400px" className="bg-white/85 backdrop-blur-xl p-8 rounded-[2.5rem] border border-slate-200/70 shadow-lg shadow-indigo-50">
             <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-8">Warehouse Inventory Status</h4>
             <div className="space-y-6">
               {myFabrics.map(f => (

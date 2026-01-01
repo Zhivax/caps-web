@@ -43,14 +43,14 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
 }) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 ${
+    className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-200 ${
       isSubItem ? 'pl-10 py-2.5' : ''
     } ${
       active && !hasChildren
-        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' 
+        ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-lg shadow-indigo-100 ring-1 ring-indigo-200/70' 
         : active && hasChildren 
-          ? 'bg-slate-50 text-indigo-600'
-          : 'text-slate-600 hover:bg-slate-50'
+          ? 'bg-slate-100/80 text-indigo-600'
+          : 'text-slate-600 hover:bg-slate-50/80 hover:text-slate-800'
     }`}
   >
     <div className="flex items-center space-x-3">
@@ -169,8 +169,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
   };
 
   return (
-    <div className="h-screen flex flex-col md:flex-row bg-slate-50 font-sans overflow-hidden">
-      <div className="md:hidden flex items-center justify-between p-4 bg-white border-b shrink-0 z-50">
+    <div className="relative min-h-screen flex flex-col md:flex-row bg-transparent font-sans overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/70 via-white to-sky-50/60" aria-hidden />
+      <div className="absolute -left-24 -top-24 w-80 h-80 bg-indigo-200/20 blur-3xl rounded-full" aria-hidden />
+      <div className="absolute right-[-10%] top-10 w-96 h-96 bg-sky-200/25 blur-[120px] rounded-full" aria-hidden />
+      <div className="md:hidden flex items-center justify-between p-4 bg-white/85 backdrop-blur-xl border-b border-slate-200/70 shadow-sm shrink-0 z-50">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-black">S</div>
           <span className="font-black text-slate-800 tracking-tighter">SUPPLYCHAIN</span>
@@ -187,9 +190,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
       </div>
 
       <aside className={`
-        fixed inset-y-0 left-0 z-[60] w-72 bg-white border-r transform transition-transform duration-500 ease-in-out
-        ${isSidebarOpen ? 'translate-x-0 shadow-2xl shadow-indigo-100' : '-translate-x-full'}
-        md:translate-x-0 md:static md:h-full
+        fixed inset-y-0 left-0 z-[60] w-72 bg-white/85 backdrop-blur-2xl border-r border-slate-200/60 transform transition-transform duration-500 ease-in-out
+        ${isSidebarOpen ? 'translate-x-0 shadow-2xl shadow-indigo-100/70' : '-translate-x-full'}
+        md:translate-x-0 md:static md:h-full md:shadow-xl md:shadow-indigo-100/60 md:rounded-r-3xl
       `}>
         <div className="h-full flex flex-col p-6">
           <div className="hidden md:flex items-center space-x-3 mb-10 px-2 shrink-0">
@@ -258,7 +261,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
       </aside>
 
       <div className="flex-1 flex flex-col min-h-0 relative">
-        <header className="hidden md:flex items-center justify-end px-10 py-5 bg-white border-b shrink-0 relative z-50">
+        <header className="hidden md:flex items-center justify-end px-10 py-5 bg-white/80 backdrop-blur-xl border-b border-slate-200/70 shrink-0 relative z-50 shadow-sm">
           <div className="flex items-center space-x-6">
             <div className="relative" ref={notifRef}>
               <button 
