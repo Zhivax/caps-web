@@ -47,21 +47,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const initData = async () => {
       setIsLoading(true);
       try {
-        const [f, r, h, s, uh] = await Promise.all([
+        const [f, r, h, s, uh, uf] = await Promise.all([
           ApiService.getFabrics(),
           ApiService.getRequests(),
           ApiService.getHijabProducts(),
           ApiService.getSales(),
-          ApiService.getUsageHistory()
+          ApiService.getUsageHistory(),
+          ApiService.getUmkmFabrics().catch(() => []) // New endpoint, may fail for suppliers
         ]);
         setFabrics(f);
         setRequests(r);
         setHijabProducts(h);
         setHijabSales(s);
         setUsageHistory(uh);
-        
-        const savedUmkmFabrics = localStorage.getItem('sc_umkm_fabrics');
-        if (savedUmkmFabrics) setUmkmFabrics(JSON.parse(savedUmkmFabrics));
+        setUmkmFabrics(uf);
         
         const savedNotifs = localStorage.getItem('sc_notifications');
         if (savedNotifs) setNotifications(JSON.parse(savedNotifs));
@@ -112,21 +111,22 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, []);
 
   const recordSale = useCallback(async (saleData: Omit<HijabSale, 'id' | 'timestamp'>) => {
-    const product = hijabProducts.find(p => p.id === saleData.productId);
-    if (!product || product.stock < saleData.quantity) {
-      throw new Error("Insufficient stock available for this transaction.");
+    try {
+      // ✅ Frontend only sends data - Backend validates & calculates
+      const response = await ApiService.recordSale(saleData);
+      
+      // ✅ Update local state from backend response
+      setHijabSales(prev => [response.sale, ...prev]);
+      setHijabProducts(prev => prev.map(p => 
+        p.id === response.sale.productId 
+          ? { ...p, stock: response.updated_stock }
+          : p
+      ));
+    } catch (error: any) {
+      // Backend returns proper error messages
+      throw error;
     }
-    const newSale: HijabSale = {
-      ...saleData,
-      id: `sale-${Date.now()}`,
-      timestamp: new Date().toISOString()
-    };
-    await ApiService.recordSale(newSale);
-    const updatedProduct = { ...product, stock: product.stock - saleData.quantity };
-    await ApiService.updateHijabProduct(updatedProduct);
-    setHijabSales(prev => [newSale, ...prev]);
-    setHijabProducts(prev => prev.map(p => p.id === product.id ? updatedProduct : p));
-  }, [hijabProducts]);
+  }, []);
 
   const submitRequest = useCallback(async (reqData: Omit<FabricRequest, 'id' | 'status' | 'timestamp' | 'umkmName'>) => {
     const newRequest: FabricRequest = {
@@ -155,37 +155,53 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const req = requests.find(r => r.id === requestId);
     if (!req) return;
 
-    if (status === RequestStatus.APPROVED) {
-      const fabric = fabrics.find(f => f.id === req.fabricId);
-      if (!fabric || fabric.stock < req.quantity) {
-        addNotification(req.umkmId, 'Order Disruption', `Order #${req.id.slice(-4)} couldn't be approved due to stock issues at supplier.`, 'error');
-        throw new Error("Insufficient fabric stock to approve this request.");
+    try {
+      // ✅ Frontend only sends request - Backend validates stock & calculates
+      await ApiService.updateRequestStatus(requestId, status);
+      
+      // ✅ Update local state
+      setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status } : r));
+
+      // Refetch fabrics to get updated stock from backend
+      const updatedFabrics = await ApiService.getFabrics();
+      setFabrics(updatedFabrics);
+      
+      // Notifications
+      if (status === RequestStatus.APPROVED) {
+        addNotification(req.umkmId, 'Payment Verified!', `Order #${req.id.slice(-4)} verified. Supplier will ship soon.`, 'success');
       }
       
-      const newStock = fabric.stock - req.quantity;
-      await ApiService.updateFabric(fabric.id, { stock: newStock });
-      setFabrics(prev => prev.map(f => f.id === fabric.id ? { ...f, stock: newStock } : f));
-      addNotification(req.umkmId, 'Payment Verified!', `Order #${req.id.slice(-4)} verified. Supplier will ship soon.`, 'success');
-    }
+      if (status === RequestStatus.REJECTED) {
+        addNotification(req.umkmId, 'Payment Rejected', `Payment proof for #${req.id.slice(-4)} was rejected. Order cancelled.`, 'error');
+      }
 
-    await ApiService.updateRequestStatus(requestId, status);
-    setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status } : r));
-
-    if (status === RequestStatus.REJECTED) {
-      addNotification(req.umkmId, 'Payment Rejected', `Payment proof for #${req.id.slice(-4)} was rejected. Order cancelled.`, 'error');
-    }
-
-    if (status === RequestStatus.COMPLETED) {
-      setUmkmFabrics(prev => {
-        const existing = prev.find(uf => uf.fabricId === req.fabricId);
-        if (existing) {
-          return prev.map(uf => uf.fabricId === req.fabricId ? { ...uf, quantity: Number((uf.quantity + req.quantity).toFixed(2)) } : uf);
+      if (status === RequestStatus.COMPLETED) {
+        // Add fabric to UMKM storage via backend
+        const umkmUser = user;
+        if (umkmUser) {
+          await ApiService.addUmkmFabric({
+            umkmId: umkmUser.id,
+            fabricId: req.fabricId,
+            fabricName: req.fabricName,
+            fabricColor: req.fabricColor,
+            quantity: req.quantity
+          });
+          
+          // Refetch UMKM fabrics
+          const updatedUmkmFabrics = await ApiService.getUmkmFabrics();
+          setUmkmFabrics(updatedUmkmFabrics);
         }
-        return [...prev, { id: `uf-${Date.now()}`, fabricId: req.fabricId, name: req.fabricName, color: req.fabricColor, quantity: req.quantity }];
-      });
-      addNotification(req.umkmId, 'Materials Received', `${req.fabricName} (${req.fabricColor}) added to local stock.`, 'success');
+        
+        addNotification(req.umkmId, 'Materials Received', `${req.fabricName} (${req.fabricColor}) added to local stock.`, 'success');
+      }
+    } catch (error: any) {
+      // Backend returns proper error messages
+      if (status === RequestStatus.APPROVED) {
+        addNotification(req.umkmId, 'Order Disruption', `Order #${req.id.slice(-4)} couldn't be approved: ${error.message}`, 'error');
+      }
+      throw error;
     }
-  }, [requests, fabrics, addNotification]);
+  }, [requests, user, addNotification]);
 
   const updateFabric = useCallback(async (fabricId: string, updates: Partial<Fabric>) => {
     await ApiService.updateFabric(fabricId, updates);
@@ -193,57 +209,47 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, []);
 
   const produceExistingHijab = useCallback(async (productId: string, quantity: number, fabricUsed: number) => {
-    const product = hijabProducts.find(p => p.id === productId);
-    if (!product) throw new Error("Product not found.");
-
-    const fabric = umkmFabrics.find(f => f.fabricId === product.fabricId);
-    if (!fabric || fabric.quantity < fabricUsed) {
-      throw new Error("Insufficient raw materials in warehouse.");
+    try {
+      // ✅ Frontend only sends request - Backend validates & calculates
+      const response = await ApiService.produceHijab(productId, quantity, fabricUsed);
+      
+      // ✅ Update local state from backend response
+      setHijabProducts(prev => prev.map(p => 
+        p.id === productId ? response.product : p
+      ));
+      setUsageHistory(prev => [response.usage_log, ...prev]);
+      
+      // Refetch UMKM fabrics to get updated quantities
+      const updatedUmkmFabrics = await ApiService.getUmkmFabrics();
+      setUmkmFabrics(updatedUmkmFabrics);
+    } catch (error: any) {
+      // Backend returns proper error messages
+      throw error;
     }
-
-    const newUsage: UsageLog = {
-      id: `uh-${Date.now()}`,
-      productId: product.id,
-      productName: product.name,
-      fabricId: fabric.fabricId,
-      fabricName: fabric.name,
-      fabricUsed,
-      quantityProduced: quantity,
-      timestamp: new Date().toISOString()
-    };
-
-    setUsageHistory(prev => [newUsage, ...prev]);
-    setUmkmFabrics(prev => prev.map(uf => uf.fabricId === product.fabricId ? { ...uf, quantity: Number((uf.quantity - fabricUsed).toFixed(2)) } : uf));
-    const updatedProduct = { ...product, stock: product.stock + quantity };
-    await ApiService.updateHijabProduct(updatedProduct);
-    setHijabProducts(prev => prev.map(p => p.id === productId ? updatedProduct : p));
-  }, [hijabProducts, umkmFabrics]);
+  }, []);
 
   const addHijabProduct = useCallback(async (productData: Omit<HijabProduct, 'id' | 'umkmId'>, fabricUsed: number) => {
-    const fabric = umkmFabrics.find(f => f.fabricId === productData.fabricId);
-    if (!fabric || fabric.quantity < fabricUsed) {
-      throw new Error("Insufficient raw materials in warehouse.");
+    // For new products, we still need to create the product first, then produce
+    const newProduct: HijabProduct = { ...productData, id: `temp-${Date.now()}`, umkmId: user!.id };
+    
+    try {
+      // Create the product via backend
+      await ApiService.updateHijabProduct(newProduct);
+      
+      // Then produce using the production endpoint
+      const response = await ApiService.produceHijab(newProduct.id, productData.stock, fabricUsed);
+      
+      // Update local state
+      setHijabProducts(prev => [...prev.filter(p => p.id !== newProduct.id), response.product]);
+      setUsageHistory(prev => [response.usage_log, ...prev]);
+      
+      // Refetch UMKM fabrics
+      const updatedUmkmFabrics = await ApiService.getUmkmFabrics();
+      setUmkmFabrics(updatedUmkmFabrics);
+    } catch (error: any) {
+      throw error;
     }
-
-    const newId = `h-${Date.now()}`;
-    const newProduct: HijabProduct = { ...productData, id: newId, umkmId: user!.id };
-
-    const newUsage: UsageLog = {
-      id: `uh-new-${Date.now()}`,
-      productId: newId,
-      productName: productData.name,
-      fabricId: productData.fabricId,
-      fabricName: fabric.name,
-      fabricUsed,
-      quantityProduced: productData.stock,
-      timestamp: new Date().toISOString()
-    };
-
-    setUsageHistory(prev => [newUsage, ...prev]);
-    await ApiService.updateHijabProduct(newProduct);
-    setHijabProducts(prev => [...prev, newProduct]);
-    setUmkmFabrics(prev => prev.map(uf => uf.fabricId === productData.fabricId ? { ...uf, quantity: Number((uf.quantity - fabricUsed).toFixed(2)) } : uf));
-  }, [user, umkmFabrics]);
+  }, [user]);
 
   const addFabric = useCallback(async (fabricData: Omit<Fabric, 'id' | 'supplierId' | 'supplierName'>) => {
     const newFabric = { ...fabricData, id: `f-${Date.now()}`, supplierId: user!.id, supplierName: user!.name };
