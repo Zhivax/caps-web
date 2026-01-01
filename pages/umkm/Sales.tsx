@@ -12,10 +12,10 @@ const SaleRow = memo(({ sale }: { sale: any }) => (
       <p className="text-[11px] font-black text-slate-800">{new Date(sale.date).toLocaleDateString()}</p>
       <p className="text-[9px] font-bold text-indigo-400 uppercase">{sale.trackingNumber}</p>
     </td>
-    <td className="px-8 py-5 text-xs font-black text-slate-700">{sale.productName}</td>
-    <td className="px-8 py-5 text-sm font-black text-slate-900">{sale.quantity} pcs</td>
+    <td className="px-8 py-5 text-sm font-medium text-slate-700">{sale.productName}</td>
+    <td className="px-8 py-5 text-base font-semibold text-slate-900">{sale.quantity} pcs</td>
     <td className="px-8 py-5 text-right">
-      <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[9px] font-black uppercase">Completed</span>
+      <span className="px-3 py-1 rounded-full bg-green-50 text-green-600 text-xs font-medium uppercase">Completed</span>
     </td>
   </tr>
 ));
@@ -43,8 +43,8 @@ export const Sales: React.FC = () => {
     <div className="space-y-6 animate-in fade-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-black text-slate-800 uppercase tracking-widest flex items-center gap-3">
-            <BadgeDollarSign className="text-indigo-600" size={24} />
+          <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-3">
+            <BadgeDollarSign className="text-slate-900" size={24} />
             Sales Management
           </h3>
         </div>
@@ -56,19 +56,19 @@ export const Sales: React.FC = () => {
               placeholder="Search..."
               value={searchTerm}
               onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1);}}
-              className="pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-2xl text-[11px] font-black uppercase"
+              className="pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-lg text-[11px] font-black uppercase"
             />
           </div>
-          <button onClick={() => setIsModalOpen(true)} className="px-6 py-3 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-indigo-100">
+          <button onClick={() => setIsModalOpen(true)} className="px-6 py-3 bg-slate-900 text-white rounded-lg text-xs font-medium uppercase tracking-widest shadow-xl shadow-indigo-100">
             <Plus size={16} className="inline mr-2" /> New Sale
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden h-[600px] flex flex-col">
+      <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden h-[600px] flex flex-col">
         <div className="flex-1 overflow-auto">
           <table className="w-full text-left">
-            <thead className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase border-b sticky top-0 z-10">
+            <thead className="bg-slate-50 text-xs font-medium text-slate-400 uppercase border-b sticky top-0 z-10">
               <tr>
                 <th className="px-8 py-5">Date & Invoice</th>
                 <th className="px-8 py-5">Product</th>
@@ -90,7 +90,7 @@ export const Sales: React.FC = () => {
           </table>
         </div>
         <div className="px-8 py-5 border-t flex justify-between items-center bg-slate-50/50">
-           <span className="text-[9px] font-black text-slate-400 uppercase">Page {currentPage} of {totalPages || 1}</span>
+           <span className="text-xs font-medium text-slate-400 uppercase">Page {currentPage} of {totalPages || 1}</span>
            <div className="flex gap-2">
              <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} disabled={currentPage === 1} className="p-2 rounded-xl border bg-white disabled:opacity-30 transition-opacity"><ChevronLeft size={16}/></button>
              <button onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} disabled={currentPage === totalPages || totalPages === 0} className="p-2 rounded-xl border bg-white disabled:opacity-30 transition-opacity"><ChevronRight size={16}/></button>

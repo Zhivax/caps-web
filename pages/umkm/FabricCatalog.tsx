@@ -155,15 +155,15 @@ export const FabricCatalog: React.FC = () => {
 
       {selectedFabric && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-md">
-          <div className="bg-white/90 backdrop-blur-2xl border border-slate-200/70 rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="px-8 py-5 bg-gradient-to-r from-indigo-600 to-sky-500 text-white flex items-center justify-between">
+          <div className="bg-white/90 backdrop-blur-2xl border border-slate-200 rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-8 py-5 bg-gradient-to-r bg-slate-900 text-white flex items-center justify-between">
               <h4 className="font-black text-[10px] uppercase tracking-widest">Order Material</h4>
               <button onClick={() => setSelectedFabric(null)} className="p-2 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
             </div>
             
-            <form onSubmit={handleRequestSubmit} className="p-8 space-y-6">
-              <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 shrink-0"><Package size={20} /></div>
+            <form onSubmit={handleRequestSubmit} className="p-6 space-y-6">
+              <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg border border-slate-100">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-slate-900 shrink-0"><Package size={20} /></div>
                   <div className="min-w-0">
                       <h5 className="font-black text-slate-800 text-xs truncate">{selectedFabric.name}</h5>
                       <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{selectedFabric.supplierName}</p>
@@ -171,26 +171,26 @@ export const FabricCatalog: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Quantity (meters)</label>
+                  <label className="block text-xs font-medium text-slate-400 uppercase tracking-widest ml-1">Quantity (meters)</label>
                   <input 
                       type="number" 
                       min="1" 
                       max={selectedFabric.stock}
                       value={requestQty}
                       onChange={(e) => setRequestQty(Number(e.target.value))}
-                      className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl outline-none focus:border-indigo-500 font-bold text-slate-800 text-sm"
+                      className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl outline-none focus:border-slate-500 font-bold text-slate-800 text-sm"
                       required
                   />
               </div>
 
-              <div className="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100 flex justify-between items-end">
-                  <p className="text-[9px] font-black text-slate-400 uppercase">Grand Total</p>
-                  <p className="text-xl font-black text-indigo-600">Rp {(selectedFabric.pricePerUnit * requestQty).toLocaleString()}</p>
+              <div className="p-4 bg-indigo-50/50 rounded-lg border border-slate-100 flex justify-between items-end">
+                  <p className="text-xs font-medium text-slate-400 uppercase">Grand Total</p>
+                  <p className="text-xl font-black text-slate-900">Rp {(selectedFabric.pricePerUnit * requestQty).toLocaleString()}</p>
               </div>
 
               <button 
                   type="submit"
-                  className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-700 shadow-xl shadow-indigo-100 transition-all active:scale-95"
+                  className="w-full py-4 bg-slate-900 text-white rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 shadow-xl shadow-indigo-100 transition-all active:scale-95"
               >
                   Submit Order
               </button>

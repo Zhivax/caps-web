@@ -22,29 +22,29 @@ export const UsageHistory: React.FC = () => {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-black text-slate-800 uppercase tracking-widest flex items-center gap-3">
-            <HistoryIcon className="text-indigo-600" size={24} />
+          <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-3">
+            <HistoryIcon className="text-slate-900" size={24} />
             Consumption History
           </h3>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 ml-9">Audit trail of materials used in production batches</p>
+          <p className="text-sm text-slate-500 mt-1 ml-9">Audit trail of materials used in production batches</p>
         </div>
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input 
             type="text" 
             placeholder="Search logs..." 
-            className="pl-12 pr-4 py-3 bg-white border border-slate-100 rounded-2xl outline-none w-full md:w-80 font-bold text-xs"
+            className="pl-12 pr-4 py-3 bg-white border border-slate-100 rounded-lg outline-none w-full md:w-80 font-bold text-xs"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
 
-      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[580px]">
+      <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[580px]">
         <div className="flex-1 overflow-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] border-b">
+              <tr className="bg-slate-50 text-slate-500 text-xs font-medium uppercase tracking-[0.2em] border-b">
                 <th className="px-8 py-5">Date & Time</th>
                 <th className="px-8 py-5">Product Target</th>
                 <th className="px-8 py-5">Material Used</th>
@@ -67,16 +67,16 @@ export const UsageHistory: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-8 py-5">
-                      <span className="text-xs font-black text-slate-800">{log.productName}</span>
+                      <span className="text-sm font-medium text-slate-800">{log.productName}</span>
                     </td>
                     <td className="px-8 py-5">
                       <span className="text-xs font-bold text-slate-500">{log.fabricName}</span>
                     </td>
                     <td className="px-8 py-5">
-                      <span className="text-xs font-black text-emerald-600">{log.quantityProduced} pcs</span>
+                      <span className="text-sm font-medium text-green-600">{log.quantityProduced} pcs</span>
                     </td>
                     <td className="px-8 py-5 text-right">
-                      <span className="text-sm font-black text-indigo-600">-{log.fabricUsed.toFixed(1)}m</span>
+                      <span className="text-base font-semibold text-slate-900">-{log.fabricUsed.toFixed(1)}m</span>
                     </td>
                   </tr>
                 ))
@@ -86,7 +86,7 @@ export const UsageHistory: React.FC = () => {
         </div>
 
         <div className="px-8 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between shrink-0">
-          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Page {currentPage} of {totalPages || 1}</span>
+          <span className="text-xs font-medium text-slate-400 uppercase tracking-widest">Page {currentPage} of {totalPages || 1}</span>
           <div className="flex gap-2">
             <button 
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}

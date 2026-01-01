@@ -25,16 +25,16 @@ export const AddFabric: React.FC = () => {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-black text-slate-800 uppercase tracking-widest flex items-center gap-3">
-            <AddIcon className="text-indigo-600" size={24} />
+          <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-3">
+            <AddIcon className="text-slate-900" size={24} />
             New Fabric Listing
           </h3>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 ml-9">Add new materials to the B2B marketplace</p>
+          <p className="text-sm text-slate-500 mt-1 ml-9">Add new materials to the B2B marketplace</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
-        <div className="px-10 py-8 bg-indigo-600 text-white">
+      <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="px-8 py-8 bg-slate-900 text-white">
           <div className="flex items-center gap-3 mb-2">
             <PlusCircle size={24} className="text-indigo-200" />
             <h3 className="text-xl font-black uppercase tracking-widest leading-none">Catalog Registration</h3>
@@ -45,24 +45,24 @@ export const AddFabric: React.FC = () => {
         <form onSubmit={handleSubmit} className="p-10 space-y-8">
           <div className="space-y-6">
             <div className="space-y-2">
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Material Name</label>
+              <label className="block text-sm text-slate-500 ml-1">Material Name</label>
               <input 
                 type="text"
                 placeholder="e.g. Voal Ultrafine High Quality"
                 value={newFabric.name}
                 onChange={(e) => setNewFabric({...newFabric, name: e.target.value})}
-                className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 font-bold text-slate-800 transition-all text-sm"
+                className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-lg outline-none focus:border-slate-500 font-bold text-slate-800 transition-all text-sm"
                 required
               />
             </div>
 
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Material Category</label>
+                <label className="block text-sm text-slate-500 ml-1">Material Category</label>
                 <select 
                   value={newFabric.type}
                   onChange={(e) => setNewFabric({...newFabric, type: e.target.value})}
-                  className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 font-bold text-slate-800 transition-all text-sm"
+                  className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-lg outline-none focus:border-slate-500 font-bold text-slate-800 transition-all text-sm"
                 >
                   <option>Voal</option>
                   <option>Silk</option>
@@ -73,13 +73,13 @@ export const AddFabric: React.FC = () => {
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Color Spec</label>
+                <label className="block text-sm text-slate-500 ml-1">Color Spec</label>
                 <input 
                   type="text"
                   placeholder="e.g. Sage Green"
                   value={newFabric.color}
                   onChange={(e) => setNewFabric({...newFabric, color: e.target.value})}
-                  className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 font-bold text-slate-800 transition-all text-sm"
+                  className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-lg outline-none focus:border-slate-500 font-bold text-slate-800 transition-all text-sm"
                   required
                 />
               </div>
@@ -87,23 +87,23 @@ export const AddFabric: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Price per Meter (Rp)</label>
+                <label className="block text-sm text-slate-500 ml-1">Price per Meter (Rp)</label>
                 <input 
                   type="number"
                   value={newFabric.pricePerUnit}
                   onChange={(e) => setNewFabric({...newFabric, pricePerUnit: Number(e.target.value)})}
-                  className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 font-bold text-slate-800 transition-all text-sm"
+                  className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-lg outline-none focus:border-slate-500 font-bold text-slate-800 transition-all text-sm"
                   required
                   min="0"
                 />
               </div>
               <div className="space-y-2">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Initial Stock (m)</label>
+                <label className="block text-sm text-slate-500 ml-1">Initial Stock (m)</label>
                 <input 
                   type="number"
                   value={newFabric.stock}
                   onChange={(e) => setNewFabric({...newFabric, stock: Number(e.target.value)})}
-                  className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 font-bold text-slate-800 transition-all text-sm"
+                  className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-lg outline-none focus:border-slate-500 font-bold text-slate-800 transition-all text-sm"
                   required
                   min="0"
                 />
@@ -114,13 +114,13 @@ export const AddFabric: React.FC = () => {
           <div className="pt-6 border-t border-slate-50 flex flex-col sm:flex-row gap-4">
             <button 
               type="submit"
-              className="flex-1 py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-700 shadow-xl shadow-indigo-100 transition-all active:scale-95"
+              className="flex-1 py-5 bg-slate-900 text-white rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 shadow-xl shadow-indigo-100 transition-all active:scale-95"
             >
               Register Material
             </button>
           </div>
 
-          <div className="flex items-center justify-center gap-2 text-[10px] font-black text-slate-300 uppercase tracking-widest">
+          <div className="flex items-center justify-center gap-2 text-xs font-medium text-slate-300 uppercase tracking-widest">
             <ShieldCheck size={14} /> Certified Secure Listing
           </div>
         </form>
