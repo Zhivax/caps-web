@@ -45,8 +45,8 @@ Dokumen ini merangkum alur penggunaan aplikasi berdasarkan struktur kode dan tam
    - **Material Inventory (`pages/supplier/InventoryList.tsx`)**: Lihat kain milik supplier, edit stok & harga secara inline.
    - **Add New Fabric (`pages/supplier/AddFabric.tsx`)**: Tambah kain baru ke katalog (disimpan di `localStorage` dan konteks).
 4. **Proses Pesanan**
-     - **Incoming Orders (`pages/supplier/Requests.tsx`)**:
-      - Melihat permintaan dari UMKM dengan status PENDING/WAITING_VERIFICATION/APPROVED/SHIPPED.
+   - **Incoming Orders (`pages/supplier/Requests.tsx`)**:
+     - Melihat permintaan dari UMKM dengan status PENDING/WAITING_VERIFICATION/APPROVED/SHIPPED.
      - Validasi bukti bayar → Approve (stok kain otomatis berkurang). Bisa Reject/Cancel bila perlu.
      - Setelah Approved, dapat menandai SHIPPED.
 5. **Riwayat**
