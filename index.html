@@ -14,6 +14,31 @@
             fontFamily: {
               sans: ['Inter', 'sans-serif'],
             },
+            colors: {
+              primary: {
+                50: '#f5f7ff',
+                100: '#ebf0ff',
+                200: '#d6e0ff',
+                300: '#b3c7ff',
+                400: '#8ca3ff',
+                500: '#6b7fff',
+                600: '#4f5bff',
+                700: '#3d47eb',
+                800: '#2e38c7',
+                900: '#2530a3',
+              },
+            },
+            borderRadius: {
+              'xl': '0.75rem',
+              '2xl': '1rem',
+              '3xl': '1.25rem',
+              '4xl': '1.5rem',
+            },
+            boxShadow: {
+              'soft': '0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)',
+              'medium': '0 4px 16px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03)',
+              'large': '0 8px 32px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04)',
+            },
           },
         },
       }
@@ -21,20 +46,32 @@
     <style>
         body { 
           font-family: 'Inter', sans-serif; 
-          background: radial-gradient(circle at 20% 20%, #eef2ff 0, #f8fafc 25%, transparent 35%), 
-                      radial-gradient(circle at 80% 0%, #dbeafe 0, #f8fafc 30%, transparent 45%), 
-                      linear-gradient(135deg, #f5f7fb 0%, #ffffff 50%, #eef2ff 100%);
+          background: #fafafa;
         }
         /* Smooth scrolling for the whole page */
         html { scroll-behavior: smooth; }
-        body::before {
-          content: '';
-          position: fixed;
-          inset: 0;
-          background: radial-gradient(circle at 40% 40%, rgba(79,70,229,0.06), transparent 35%), 
-                      radial-gradient(circle at 70% 60%, rgba(14,165,233,0.05), transparent 32%);
-          pointer-events: none;
-          z-index: 0;
+        
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #d1d5db;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #9ca3af;
+        }
+        
+        /* Smooth transitions */
+        * {
+          transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+          transition-duration: 150ms;
         }
     </style>
 <script type="importmap">

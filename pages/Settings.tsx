@@ -4,37 +4,36 @@ import { Settings as SettingsIcon, Rocket, Clock, Sparkles } from 'lucide-react'
 
 export const Settings: React.FC = () => {
   return (
-    <div className="h-[70vh] flex flex-col items-center justify-center animate-in fade-in duration-700">
-      <div className="relative mb-8">
-        <div className="absolute inset-0 bg-indigo-100 rounded-full blur-3xl opacity-30 animate-pulse"></div>
-        <div className="relative p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-indigo-50/50">
-          <SettingsIcon className="text-indigo-600 animate-[spin_10s_linear_infinite]" size={64} />
-          <div className="absolute -top-2 -right-2 p-3 bg-amber-400 text-white rounded-2xl shadow-lg rotate-12">
-            <Sparkles size={20} />
+    <div className="h-[60vh] flex flex-col items-center justify-center">
+      <div className="relative mb-6">
+        <div className="p-6 bg-white rounded-xl border border-slate-200 shadow-soft">
+          <SettingsIcon className="text-slate-900" size={48} />
+          <div className="absolute -top-1 -right-1 p-2 bg-amber-400 text-white rounded-lg shadow-soft">
+            <Sparkles size={16} />
           </div>
         </div>
       </div>
 
-      <div className="text-center space-y-4 max-w-md">
-        <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter">
+      <div className="text-center space-y-3 max-w-md">
+        <h3 className="text-xl font-semibold text-slate-900">
           Platform Configuration
         </h3>
         <div className="flex items-center justify-center gap-2">
-          <span className="px-4 py-1.5 bg-indigo-600 text-white text-[10px] font-black rounded-full uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-indigo-100">
-            <Rocket size={12} /> Coming Soon
+          <span className="px-3 py-1.5 bg-slate-900 text-white text-xs font-medium rounded-lg flex items-center gap-2">
+            <Rocket size={14} /> Coming Soon
           </span>
-          <span className="px-4 py-1.5 bg-slate-100 text-slate-400 text-[10px] font-black rounded-full uppercase tracking-widest flex items-center gap-2">
-            <Clock size={12} /> In Development
+          <span className="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-medium rounded-lg flex items-center gap-2">
+            <Clock size={14} /> In Development
           </span>
         </div>
-        <p className="text-xs font-medium text-slate-400 leading-relaxed px-6">
+        <p className="text-sm text-slate-500 leading-relaxed px-6">
           We are building a robust preference engine to help you customize your supply chain experience. This feature will be available in the next major update.
         </p>
       </div>
 
-      <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-2xl opacity-40 grayscale">
+      <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-3 w-full max-w-2xl opacity-40">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-24 bg-white border border-slate-100 rounded-3xl border-dashed"></div>
+          <div key={i} className="h-20 bg-white border border-slate-200 rounded-lg border-dashed"></div>
         ))}
       </div>
     </div>

@@ -98,22 +98,22 @@ export const RawMaterials: React.FC = () => {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-black text-slate-800 uppercase tracking-widest flex items-center gap-3">
-            <Package className="text-indigo-600" size={24} />
+          <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-3">
+            <Package className="text-slate-900" size={24} />
             Raw Materials
           </h3>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 ml-9">Warehouse inventory and production processing center</p>
+          <p className="text-sm text-slate-500 mt-1 ml-9">Warehouse inventory and production processing center</p>
         </div>
       </div>
 
       {/* Search & Actions Bar */}
-      <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col xl:flex-row xl:items-center gap-4">
+      <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm flex flex-col xl:flex-row xl:items-center gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input 
             type="text" 
             placeholder="Search Raw Material..." 
-            className="pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none w-full focus:ring-4 focus:ring-indigo-50 transition-all font-bold text-sm" 
+            className="pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none w-full focus:ring-4 focus:ring-indigo-50 transition-all font-bold text-sm" 
             value={searchTerm} 
             onChange={(e) => setSearchTerm(e.target.value)} 
           />
@@ -121,7 +121,7 @@ export const RawMaterials: React.FC = () => {
         
         <div className="flex flex-wrap items-center gap-3 shrink-0">
           <select 
-            className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-bold text-xs text-slate-600 focus:ring-4 focus:ring-indigo-50"
+            className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none font-bold text-xs text-slate-600 focus:ring-4 focus:ring-indigo-50"
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
           >
@@ -129,7 +129,7 @@ export const RawMaterials: React.FC = () => {
           </select>
 
           <select 
-            className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-bold text-xs text-slate-600 focus:ring-4 focus:ring-indigo-50"
+            className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none font-bold text-xs text-slate-600 focus:ring-4 focus:ring-indigo-50"
             value={filterColor}
             onChange={(e) => setFilterColor(e.target.value)}
           >
@@ -139,13 +139,13 @@ export const RawMaterials: React.FC = () => {
           <div className="flex gap-2">
             <button 
               onClick={() => setIsRestockModalOpen(true)}
-              className="px-6 py-3 bg-slate-800 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all flex items-center gap-2"
+              className="px-6 py-3 bg-slate-800 text-white rounded-lg text-xs font-medium uppercase tracking-widest hover:bg-slate-900 transition-all flex items-center gap-2"
             >
               <Hammer size={16} /> Restock SKU
             </button>
             <button 
               onClick={() => setIsNewProductModalOpen(true)}
-              className="px-6 py-3 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 shadow-xl shadow-indigo-100 transition-all flex items-center gap-2"
+              className="px-6 py-3 bg-slate-900 text-white rounded-lg text-xs font-medium uppercase tracking-widest hover:bg-slate-800 shadow-xl shadow-indigo-100 transition-all flex items-center gap-2"
             >
               <Plus size={16} /> New Product
             </button>
@@ -154,10 +154,10 @@ export const RawMaterials: React.FC = () => {
       </div>
 
       {/* Main Table */}
-      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
         <table className="w-full text-left">
           <thead>
-            <tr className="bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] border-b">
+            <tr className="bg-slate-50 text-slate-500 text-xs font-medium uppercase tracking-[0.2em] border-b">
               <th className="px-8 py-5">Material Description</th>
               <th className="px-8 py-5">Color Spec</th>
               <th className="px-8 py-5">Stock Length</th>
@@ -187,12 +187,12 @@ export const RawMaterials: React.FC = () => {
                     </td>
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-2">
-                        <Ruler size={14} className="text-indigo-400" />
-                        <span className="text-sm font-black text-indigo-600">{uf.quantity.toFixed(2)} meters</span>
+                        <Ruler size={14} className="text-slate-500" />
+                        <span className="text-base font-semibold text-slate-900">{uf.quantity.toFixed(2)} meters</span>
                       </div>
                     </td>
                     <td className="px-8 py-5">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <span className="text-sm text-slate-500">
                         Approx. <span className="text-slate-800">{estCap} Hijabs</span>
                       </span>
                     </td>
@@ -207,10 +207,10 @@ export const RawMaterials: React.FC = () => {
       {/* MODAL: Restock Batch */}
       {isRestockModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
-          <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="px-8 py-6 bg-slate-800 text-white flex justify-between items-center">
               <div>
-                <h4 className="text-sm font-black uppercase tracking-widest">Restock Batch</h4>
+                <h4 className="text-base font-semibold uppercase tracking-widest">Restock Batch</h4>
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Produce existing SKU items</p>
               </div>
               <button onClick={() => setIsRestockModalOpen(false)} className="hover:bg-white/20 p-2 rounded-full transition-all">
@@ -221,9 +221,9 @@ export const RawMaterials: React.FC = () => {
             <form onSubmit={handleExistingSubmit} className="p-10 space-y-6">
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Active SKU</label>
+                  <label className="block text-xs font-medium text-slate-400 uppercase tracking-widest ml-1">Select Active SKU</label>
                   <select 
-                    className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 font-bold text-slate-800 text-sm"
+                    className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-lg outline-none focus:border-slate-500 font-bold text-slate-800 text-sm"
                     value={selectedProductId}
                     onChange={(e) => setSelectedProductId(e.target.value)}
                     required
@@ -233,11 +233,11 @@ export const RawMaterials: React.FC = () => {
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Production Amount (pcs)</label>
+                  <label className="block text-xs font-medium text-slate-400 uppercase tracking-widest ml-1">Production Amount (pcs)</label>
                   <input 
                     type="number"
                     min="1"
-                    className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 font-bold text-slate-800 text-sm"
+                    className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-lg outline-none focus:border-slate-500 font-bold text-slate-800 text-sm"
                     value={restockQty}
                     onChange={(e) => setRestockQty(Number(e.target.value))}
                     required
@@ -246,11 +246,11 @@ export const RawMaterials: React.FC = () => {
               </div>
 
               {selectedProductId && restockQty > 0 && (
-                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                  <p className="text-[9px] font-black text-slate-400 uppercase mb-2">Efficiency Check</p>
+                <div className="p-5 bg-slate-50 rounded-lg border border-slate-100">
+                  <p className="text-xs font-medium text-slate-400 uppercase mb-2">Efficiency Check</p>
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-slate-600">Material Needed:</span>
-                    <span className="text-sm font-black text-indigo-600">{(restockQty * FABRIC_PER_UNIT).toFixed(1)}m</span>
+                    <span className="text-base font-semibold text-slate-900">{(restockQty * FABRIC_PER_UNIT).toFixed(1)}m</span>
                   </div>
                 </div>
               )}
@@ -258,7 +258,7 @@ export const RawMaterials: React.FC = () => {
               <button 
                 type="submit"
                 disabled={!selectedProductId || restockQty <= 0}
-                className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-40"
+                className="w-full py-5 bg-slate-900 text-white rounded-lg font-black text-[10px] uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-slate-800 transition-all active:scale-95 disabled:opacity-40"
               >
                 Confirm & Start Production
               </button>
@@ -270,10 +270,10 @@ export const RawMaterials: React.FC = () => {
       {/* MODAL: New Product Lab */}
       {isNewProductModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
-          <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="px-8 py-6 bg-indigo-600 text-white flex justify-between items-center">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-8 py-6 bg-slate-900 text-white flex justify-between items-center">
               <div>
-                <h4 className="text-sm font-black uppercase tracking-widest">New Product Lab</h4>
+                <h4 className="text-base font-semibold uppercase tracking-widest">New Product Lab</h4>
                 <p className="text-indigo-100 text-[9px] font-bold uppercase tracking-widest mt-1 opacity-80">Design & register new SKU</p>
               </div>
               <button onClick={() => setIsNewProductModalOpen(false)} className="hover:bg-white/20 p-2 rounded-full transition-all">
@@ -284,20 +284,20 @@ export const RawMaterials: React.FC = () => {
             <form onSubmit={handleNewSubmit} className="p-10 space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Design Name</label>
+                  <label className="block text-xs font-medium text-slate-400 uppercase tracking-widest ml-1">Design Name</label>
                   <input 
                     type="text"
                     placeholder="e.g. Silk Edition 2.0"
-                    className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 font-bold text-slate-800 text-sm"
+                    className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-lg outline-none focus:border-slate-500 font-bold text-slate-800 text-sm"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     required
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Raw Material Source</label>
+                  <label className="block text-xs font-medium text-slate-400 uppercase tracking-widest ml-1">Raw Material Source</label>
                   <select 
-                    className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 font-bold text-slate-800 text-sm"
+                    className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-lg outline-none focus:border-slate-500 font-bold text-slate-800 text-sm"
                     value={selectedFabricId}
                     onChange={(e) => setSelectedFabricId(e.target.value)}
                     required
@@ -310,21 +310,21 @@ export const RawMaterials: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Initial Batch (pcs)</label>
+                  <label className="block text-xs font-medium text-slate-400 uppercase tracking-widest ml-1">Initial Batch (pcs)</label>
                   <input 
                     type="number"
                     min="1"
-                    className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 font-bold text-slate-800 text-sm"
+                    className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-lg outline-none focus:border-slate-500 font-bold text-slate-800 text-sm"
                     value={newQty}
                     onChange={(e) => setNewQty(Number(e.target.value))}
                     required
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Safety Threshold (pcs)</label>
+                  <label className="block text-xs font-medium text-slate-400 uppercase tracking-widest ml-1">Safety Threshold (pcs)</label>
                   <input 
                     type="number"
-                    className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 font-bold text-slate-800 text-sm"
+                    className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-lg outline-none focus:border-slate-500 font-bold text-slate-800 text-sm"
                     value={threshold}
                     onChange={(e) => setThreshold(Number(e.target.value))}
                     required
@@ -333,16 +333,16 @@ export const RawMaterials: React.FC = () => {
               </div>
 
               {selectedFabricId && newQty > 0 && (
-                <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 flex justify-between items-center">
-                  <p className="text-[10px] font-black text-indigo-400 uppercase">Consumption: <span className="text-indigo-600">{(newQty * FABRIC_PER_UNIT).toFixed(1)}m</span></p>
-                  < ShieldCheck size={16} className="text-indigo-400" />
+                <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 flex justify-between items-center">
+                  <p className="text-xs font-medium text-slate-500 uppercase">Consumption: <span className="text-slate-900">{(newQty * FABRIC_PER_UNIT).toFixed(1)}m</span></p>
+                  < ShieldCheck size={16} className="text-slate-500" />
                 </div>
               )}
 
               <button 
                 type="submit"
                 disabled={!newName || !selectedFabricId || newQty <= 0}
-                className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-40"
+                className="w-full py-5 bg-slate-900 text-white rounded-lg font-black text-[10px] uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-slate-800 transition-all active:scale-95 disabled:opacity-40"
               >
                 Launch New Product Batch
               </button>
