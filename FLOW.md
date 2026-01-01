@@ -1,4 +1,4 @@
-# Alur Website SupplyChain Dashboard
+# Aliran Website SupplyChain Dashboard
 
 Dokumen ini merangkum alur penggunaan aplikasi berdasarkan struktur kode dan tampilan yang ada di repository.
 
@@ -45,8 +45,8 @@ Dokumen ini merangkum alur penggunaan aplikasi berdasarkan struktur kode dan tam
    - **Material Inventory (`pages/supplier/InventoryList.tsx`)**: Lihat kain milik supplier, edit stok & harga secara inline.
    - **Add New Fabric (`pages/supplier/AddFabric.tsx`)**: Tambah kain baru ke katalog (disimpan di `localStorage` dan konteks).
 4. **Proses Pesanan**
-   - **Incoming Orders (`pages/supplier/Requests.tsx`)**:
-     - Melihat permintaan dari UMKM dengan status PENDING/WAI­TING_VERIFICATION/APPROVED/SHIPPED.
+     - **Incoming Orders (`pages/supplier/Requests.tsx`)**:
+      - Melihat permintaan dari UMKM dengan status PENDING/WAITING_VERIFICATION/APPROVED/SHIPPED.
      - Validasi bukti bayar → Approve (stok kain otomatis berkurang). Bisa Reject/Cancel bila perlu.
      - Setelah Approved, dapat menandai SHIPPED.
 5. **Riwayat**
@@ -59,7 +59,7 @@ Dokumen ini merangkum alur penggunaan aplikasi berdasarkan struktur kode dan tam
 - **Persistensi**: Semua mutasi ditulis ke `localStorage` agar sesi berikutnya memuat data terbaru.
 
 ## Cara Uji Coba Manual (disarankan)
-1. Jalankan `npm install` lalu `npm run dev` atau `npm run build` untuk memastikan aplikasi kompilasi.
+1. Jalankan `npm install` lalu `npm run dev` atau `npm run build` untuk memastikan aplikasi terkompilasi.
 2. **Skenario UMKM**
    - Login `umkm@example.com`.
    - Buat permintaan di Fabric Catalog, unggah bukti di Order History, lalu tandai selesai ketika sudah dikirim (setelah supplier approve/ship).
