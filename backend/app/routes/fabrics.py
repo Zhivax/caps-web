@@ -23,6 +23,13 @@ async def add_fabric(fabric: Fabric, current_user: TokenData = Depends(get_curre
             detail="Only suppliers can add fabrics"
         )
     
+    # Validate ownership: fabric must belong to current user
+    if fabric.supplierId != current_user.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only add fabrics for yourself"
+        )
+    
     fabric.name = InputSanitizer.sanitize_string(fabric.name, 100)
     fabric.type = InputSanitizer.sanitize_string(fabric.type, 50)
     fabric.color = InputSanitizer.sanitize_string(fabric.color, 50)

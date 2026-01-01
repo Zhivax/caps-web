@@ -11,8 +11,15 @@ router = APIRouter(prefix="/api/requests", tags=["requests"])
 
 @router.get("", response_model=List[FabricRequest])
 async def get_requests(current_user: TokenData = Depends(get_current_active_user)):
-    """Get fabric requests"""
-    return REQUESTS
+    """Get fabric requests filtered by user role"""
+    if current_user.role == "UMKM":
+        # UMKM users see only their own requests
+        return [r for r in REQUESTS if r.umkmId == current_user.user_id]
+    elif current_user.role == "SUPPLIER":
+        # Suppliers see only requests for their fabrics
+        return [r for r in REQUESTS if r.supplierId == current_user.user_id]
+    else:
+        return []
 
 @router.post("")
 async def create_request(
@@ -24,6 +31,13 @@ async def create_request(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only UMKM users can create requests"
+        )
+    
+    # Validate ownership: request must be from current user
+    if request_data.umkmId != current_user.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only create requests for yourself"
         )
     
     request_data.umkmName = InputSanitizer.sanitize_string(request_data.umkmName, 100)

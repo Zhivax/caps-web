@@ -13,8 +13,14 @@ router = APIRouter(prefix="/api", tags=["hijab"])
 
 @router.get("/hijab-products", response_model=List[HijabProduct])
 async def get_hijab_products(current_user: TokenData = Depends(get_current_active_user)):
-    """Get all hijab products"""
-    return HIJAB_PRODUCTS
+    """Get hijab products for current UMKM user only"""
+    if current_user.role != "UMKM":
+        # Suppliers might need to see products for requests, but filter appropriately
+        # For now, return empty list for non-UMKM users
+        return []
+    
+    # Return only products owned by current user
+    return [p for p in HIJAB_PRODUCTS if p.umkmId == current_user.user_id]
 
 @router.post("/hijab-products")
 async def upsert_hijab_product(
@@ -28,11 +34,24 @@ async def upsert_hijab_product(
             detail="Only UMKM users can manage products"
         )
     
+    # Validate ownership: product must belong to current user
+    if product.umkmId != current_user.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only manage your own products"
+        )
+    
     product.name = InputSanitizer.sanitize_string(product.name, 100)
     product.color = InputSanitizer.sanitize_string(product.color, 50)
     
     existing = next((p for p in HIJAB_PRODUCTS if p.id == product.id), None)
     if existing:
+        # Verify existing product also belongs to current user
+        if existing.umkmId != current_user.user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You can only update your own products"
+            )
         idx = HIJAB_PRODUCTS.index(existing)
         HIJAB_PRODUCTS[idx] = product
         AuditLogger.log_sensitive_operation(current_user.user_id, "UPDATE_PRODUCT", product.id)
@@ -44,13 +63,18 @@ async def upsert_hijab_product(
 
 @router.get("/sales", response_model=List[HijabSale])
 async def get_sales(current_user: TokenData = Depends(get_current_active_user)):
-    """Get hijab sales (UMKM role only)"""
+    """Get hijab sales for current UMKM user only"""
     if current_user.role != "UMKM":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only UMKM users can view sales"
         )
-    return SALES
+    
+    # Get products owned by current user
+    user_product_ids = {p.id for p in HIJAB_PRODUCTS if p.umkmId == current_user.user_id}
+    
+    # Return only sales for current user's products
+    return [sale for sale in SALES if sale.productId in user_product_ids]
 
 @router.post("/sales")
 async def record_sale(
@@ -68,6 +92,13 @@ async def record_sale(
     product = next((p for p in HIJAB_PRODUCTS if p.id == sale_request.productId), None)
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
+    
+    # Validate ownership: product must belong to current user
+    if product.umkmId != current_user.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only record sales for your own products"
+        )
     
     if product.stock < sale_request.quantity:
         raise HTTPException(
@@ -100,13 +131,18 @@ async def record_sale(
 
 @router.get("/usage-history", response_model=List[UsageLog])
 async def get_usage_history(current_user: TokenData = Depends(get_current_active_user)):
-    """Get fabric usage history (UMKM only)"""
+    """Get fabric usage history for current UMKM user only"""
     if current_user.role != "UMKM":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only UMKM users can view usage history"
         )
-    return USAGE_HISTORY
+    
+    # Get products owned by current user
+    user_product_ids = {p.id for p in HIJAB_PRODUCTS if p.umkmId == current_user.user_id}
+    
+    # Return only usage logs for current user's products
+    return [log for log in USAGE_HISTORY if log.productId in user_product_ids]
 
 @router.post("/usage-history")
 async def record_usage(
