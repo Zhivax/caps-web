@@ -57,6 +57,6 @@ temp/
 README.md
 
 # Other deployment configs
-Dockerfile
-nginx.conf
+# Dockerfile - NEEDED for Cloud Run deployment
+# nginx.conf - NEEDED for Cloud Run deployment
 wrangler.jsonc
