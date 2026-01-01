@@ -43,17 +43,40 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [usageHistory, setUsageHistory] = useState<UsageLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const logout = useCallback(() => {
+    setUser(null);
+    ApiService.logout();
+    localStorage.removeItem('sc_user');
+  }, []);
+
+  const login = useCallback(async (email: string, password: string) => {
+    setIsLoading(true);
+    const result = await ApiService.login(email, password);
+    setIsLoading(false);
+    if (result) {
+      setUser(result.user);
+      return true;
+    }
+    return false;
+  }, []);
+
   useEffect(() => {
     const initData = async () => {
+      // Skip data loading if no user is logged in
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       try {
         const [f, r, h, s, uh, uf] = await Promise.all([
           ApiService.getFabrics(),
           ApiService.getRequests(),
           ApiService.getHijabProducts(),
-          ApiService.getSales(),
-          ApiService.getUsageHistory(),
-          ApiService.getUmkmFabrics().catch(() => []) // New endpoint, may fail for suppliers
+          ApiService.getSales().catch(() => []), // May fail for suppliers
+          ApiService.getUsageHistory().catch(() => []), // May fail for suppliers
+          ApiService.getUmkmFabrics().catch(() => []) // May fail for suppliers
         ]);
         setFabrics(f);
         setRequests(r);
@@ -66,12 +89,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         if (savedNotifs) setNotifications(JSON.parse(savedNotifs));
       } catch (err) {
         console.error("Failed to fetch data:", err);
+        // If token is invalid, logout
+        if (err instanceof Error && err.message.includes('Session expired')) {
+          logout();
+        }
       } finally {
         setIsLoading(false);
       }
     };
     initData();
-  }, []);
+  }, [user?.id, logout]); // Re-fetch when user changes
 
   useEffect(() => {
     localStorage.setItem('sc_user', JSON.stringify(user));
@@ -91,23 +118,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       timestamp: new Date().toISOString()
     };
     setNotifications(prev => [newNotif, ...prev]);
-  }, []);
-
-  const login = useCallback(async (email: string, password: string) => {
-    setIsLoading(true);
-    const result = await ApiService.login(email, password);
-    setIsLoading(false);
-    if (result) {
-      setUser(result.user);
-      return true;
-    }
-    return false;
-  }, []);
-
-  const logout = useCallback(() => {
-    setUser(null);
-    ApiService.logout();
-    localStorage.removeItem('sc_user');
   }, []);
 
   const recordSale = useCallback(async (saleData: Omit<HijabSale, 'id' | 'timestamp'>) => {

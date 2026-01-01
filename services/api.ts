@@ -83,9 +83,6 @@ async function fetchApi(endpoint: string, options?: RequestInit, skipAuth = fals
       accessToken = TokenManager.getAccessToken();
     } else {
       TokenManager.clearTokens();
-      // NOTE: Using window.location for demo. In production with React Router:
-      // - Pass navigate function from useNavigate hook
-      // - Or dispatch a logout action that components can handle
       window.location.href = '/';
       throw new Error('Session expired. Please login again.');
     }
@@ -105,6 +102,7 @@ async function fetchApi(endpoint: string, options?: RequestInit, skipAuth = fals
     const response = await fetch(`${BASE_URL}${endpoint}`, {
       ...options,
       headers,
+      credentials: 'include', // Include cookies for CSRF protection
     });
 
     // Handle 401 Unauthorized - try to refresh token once
@@ -113,14 +111,19 @@ async function fetchApi(endpoint: string, options?: RequestInit, skipAuth = fals
       if (refreshed) {
         // Retry the original request with new token
         const newAccessToken = TokenManager.getAccessToken();
-        headers['Authorization'] = `Bearer ${newAccessToken}`;
+        const retryHeaders = {
+          ...headers,
+          'Authorization': `Bearer ${newAccessToken}`,
+        };
         const retryResponse = await fetch(`${BASE_URL}${endpoint}`, {
           ...options,
-          headers,
+          headers: retryHeaders,
+          credentials: 'include',
         });
         
         if (!retryResponse.ok) {
-          throw new Error(`API Error: ${retryResponse.statusText}`);
+          const errorData = await retryResponse.json().catch(() => ({}));
+          throw new Error(errorData.detail || `API Error: ${retryResponse.statusText}`);
         }
         
         return retryResponse.json();
@@ -138,7 +141,11 @@ async function fetchApi(endpoint: string, options?: RequestInit, skipAuth = fals
 
     return response.json();
   } catch (error) {
-    console.error('API request failed:', error);
+    if (error instanceof Error) {
+      console.error('API request failed:', error.message);
+    } else {
+      console.error('API request failed:', error);
+    }
     throw error;
   }
 }
@@ -153,6 +160,7 @@ async function refreshAccessToken(): Promise<boolean> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refresh_token: refreshToken }),
+      credentials: 'include',
     });
 
     if (!response.ok) return false;
@@ -160,7 +168,8 @@ async function refreshAccessToken(): Promise<boolean> {
     const data = await response.json();
     TokenManager.setTokens(data.access_token, data.refresh_token);
     return true;
-  } catch {
+  } catch (error) {
+    console.error('Token refresh failed:', error);
     return false;
   }
 }
@@ -174,6 +183,7 @@ export const ApiService = {
           email: InputSanitizer.sanitizeString(email), 
           password 
         }),
+        credentials: 'include',
       }, true); // Skip auth for login
 
       // Store tokens
