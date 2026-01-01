@@ -187,7 +187,7 @@ export const RawMaterials: React.FC = () => {
                     </td>
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-2">
-                        <Ruler size={14} className="text-indigo-400" />
+                        <Ruler size={14} className="text-slate-500" />
                         <span className="text-base font-semibold text-slate-900">{uf.quantity.toFixed(2)} meters</span>
                       </div>
                     </td>
@@ -333,9 +333,9 @@ export const RawMaterials: React.FC = () => {
               </div>
 
               {selectedFabricId && newQty > 0 && (
-                <div className="p-4 bg-indigo-50 rounded-lg border border-slate-100 flex justify-between items-center">
-                  <p className="text-xs font-medium text-indigo-400 uppercase">Consumption: <span className="text-slate-900">{(newQty * FABRIC_PER_UNIT).toFixed(1)}m</span></p>
-                  < ShieldCheck size={16} className="text-indigo-400" />
+                <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 flex justify-between items-center">
+                  <p className="text-xs font-medium text-slate-500 uppercase">Consumption: <span className="text-slate-900">{(newQty * FABRIC_PER_UNIT).toFixed(1)}m</span></p>
+                  < ShieldCheck size={16} className="text-slate-500" />
                 </div>
               )}
 

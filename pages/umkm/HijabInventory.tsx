@@ -11,7 +11,7 @@ const HijabRow = memo(({ p }: { p: HijabProduct }) => {
     <tr className="hover:bg-slate-50/50 transition-colors h-[72px]">
       <td className="px-8 py-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500"><Layers size={20} /></div>
+          <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-indigo-500"><Layers size={20} /></div>
           <span className="font-black text-slate-800 text-sm truncate">{p.name}</span>
         </div>
       </td>
@@ -29,7 +29,7 @@ const HijabRow = memo(({ p }: { p: HijabProduct }) => {
       </td>
       <td className="px-8 py-5">
         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wider ${
-          isLow ? 'bg-red-50 text-red-600 border border-rose-100' : 'bg-green-50 text-green-600 border border-emerald-100'
+          isLow ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'
         }`}>
           {isLow ? <AlertTriangle size={12} className="mr-1.5" /> : <CheckCircle size={12} className="mr-1.5" />}
           {isLow ? 'Restock Needed' : 'Healthy'}

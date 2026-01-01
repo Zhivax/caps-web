@@ -156,7 +156,7 @@ export const FabricCatalog: React.FC = () => {
       {selectedFabric && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-md">
           <div className="bg-white/90 backdrop-blur-2xl border border-slate-200 rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="px-8 py-5 bg-gradient-to-r bg-slate-900 text-white flex items-center justify-between">
+            <div className="px-8 py-5 bg-slate-900 text-white flex items-center justify-between">
               <h4 className="font-black text-[10px] uppercase tracking-widest">Order Material</h4>
               <button onClick={() => setSelectedFabric(null)} className="p-2 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
             </div>
@@ -183,7 +183,7 @@ export const FabricCatalog: React.FC = () => {
                   />
               </div>
 
-              <div className="p-4 bg-indigo-50/50 rounded-lg border border-slate-100 flex justify-between items-end">
+              <div className="p-4 bg-slate-50/50 rounded-lg border border-slate-100 flex justify-between items-end">
                   <p className="text-xs font-medium text-slate-400 uppercase">Grand Total</p>
                   <p className="text-xl font-black text-slate-900">Rp {(selectedFabric.pricePerUnit * requestQty).toLocaleString()}</p>
               </div>

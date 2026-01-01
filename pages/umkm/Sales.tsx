@@ -10,7 +10,7 @@ const SaleRow = memo(({ sale }: { sale: any }) => (
   <tr className="hover:bg-slate-50/50 transition-colors">
     <td className="px-8 py-5">
       <p className="text-[11px] font-black text-slate-800">{new Date(sale.date).toLocaleDateString()}</p>
-      <p className="text-[9px] font-bold text-indigo-400 uppercase">{sale.trackingNumber}</p>
+      <p className="text-[9px] font-bold text-slate-500 uppercase">{sale.trackingNumber}</p>
     </td>
     <td className="px-8 py-5 text-sm font-medium text-slate-700">{sale.productName}</td>
     <td className="px-8 py-5 text-base font-semibold text-slate-900">{sale.quantity} pcs</td>

@@ -97,7 +97,7 @@ export const Requests: React.FC = () => {
                   </div>
 
                   {!canApprove && isVerificationNeeded && (
-                    <div className="p-3 bg-red-50 border border-rose-100 text-red-600 text-xs font-medium uppercase rounded-xl flex items-center gap-2">
+                    <div className="p-3 bg-red-50 border border-red-100 text-red-600 text-xs font-medium uppercase rounded-xl flex items-center gap-2">
                       <AlertCircle size={14} /> Stock Warning: Warehouse only has {fabric?.stock || 0}m available.
                     </div>
                   )}
@@ -113,12 +113,12 @@ export const Requests: React.FC = () => {
                         {req.paymentProof ? (
                             <button 
                                 onClick={() => setSelectedProof(req.paymentProof!)}
-                                className="w-full flex items-center justify-center gap-2 p-3 bg-white border border-slate-200 text-slate-900 rounded-xl text-xs font-medium uppercase hover:bg-indigo-50 transition-all"
+                                className="w-full flex items-center justify-center gap-2 p-3 bg-white border border-slate-200 text-slate-900 rounded-xl text-xs font-medium uppercase hover:bg-slate-50 transition-all"
                             >
                                 <ImageIcon size={16} /> View Payment Proof
                             </button>
                         ) : (
-                            <div className="p-3 bg-red-50 border border-rose-100 text-red-600 text-xs font-medium uppercase rounded-xl flex items-center gap-2">
+                            <div className="p-3 bg-red-50 border border-red-100 text-red-600 text-xs font-medium uppercase rounded-xl flex items-center gap-2">
                                 <AlertCircle size={14} /> Payment Proof Missing
                             </div>
                         )}
@@ -133,7 +133,7 @@ export const Requests: React.FC = () => {
                             </button>
                             <button 
                                 onClick={() => updateRequestStatus(req.id, RequestStatus.REJECTED)}
-                                className="flex items-center justify-center space-x-2 py-3 bg-white border border-rose-200 text-red-500 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-red-50 transition-all"
+                                className="flex items-center justify-center space-x-2 py-3 bg-white border border-red-200 text-red-500 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-red-50 transition-all"
                             >
                                 <X size={16} /> Reject Payment
                             </button>
@@ -151,7 +151,7 @@ export const Requests: React.FC = () => {
                   )}
 
                   {isShipped && (
-                    <div className="bg-green-50 p-4 rounded-lg border border-emerald-100 text-center">
+                    <div className="bg-green-50 p-4 rounded-lg border border-green-100 text-center">
                         <p className="text-xs font-medium text-green-600 uppercase tracking-widest">In Transit</p>
                         <p className="text-[9px] font-bold text-green-400 mt-1 uppercase">UMKM will confirm receipt</p>
                     </div>

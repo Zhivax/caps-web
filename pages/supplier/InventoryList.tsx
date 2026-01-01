@@ -25,7 +25,7 @@ const InventoryRow = memo(({
     <tr className="hover:bg-slate-50/50 transition-colors h-[80px]">
       <td className="px-8 py-5">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500"><Package size={20} /></div>
+          <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-indigo-500"><Package size={20} /></div>
           <div>
             <p className="text-sm font-medium text-slate-800">{f.name}</p>
             <p className="text-xs font-medium text-slate-400 uppercase tracking-widest">{f.type}</p>
@@ -70,7 +70,7 @@ const InventoryRow = memo(({
               <button onClick={onCancel} className="p-2 bg-slate-200 text-slate-600 rounded-lg hover:bg-slate-300 transition-all active:scale-95"><X size={16} /></button>
             </>
           ) : (
-            <button onClick={() => onEdit(f)} className="p-2 text-slate-900 bg-indigo-50 hover:bg-slate-900 hover:text-white rounded-lg transition-all shadow-sm active:scale-95"><Edit3 size={16} /></button>
+            <button onClick={() => onEdit(f)} className="p-2 text-slate-900 bg-slate-50 hover:bg-slate-900 hover:text-white rounded-lg transition-all shadow-sm active:scale-95"><Edit3 size={16} /></button>
           )}
         </div>
       </td>
