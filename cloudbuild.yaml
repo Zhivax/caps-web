@@ -1,0 +1,31 @@
+steps:
+  # Build the Docker image from the frontend directory
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/caps-web:$COMMIT_SHA', './frontend']
+    
+  # Push the image to Google Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/caps-web:$COMMIT_SHA']
+    
+  # Deploy to Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'caps-web'
+      - '--image=gcr.io/$PROJECT_ID/caps-web:$COMMIT_SHA'
+      - '--platform=managed'
+      - '--region=${_REGION}'
+      - '--allow-unauthenticated'
+      
+timeout: '1600s'
+
+substitutions:
+  _REGION: 'us-central1'  # Default region, can be overridden
+
+options:
+  machineType: 'N1_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY
+
+images:
+  - 'gcr.io/$PROJECT_ID/caps-web:$COMMIT_SHA'

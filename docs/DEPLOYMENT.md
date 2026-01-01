@@ -1,5 +1,13 @@
 # Google Cloud Deployment Configuration Summary
 
+## Important: Monorepo Structure
+
+This repository has been restructured as a monorepo. The frontend application files are now located in the `frontend/` directory. The root-level `cloudbuild.yaml` file has been configured to handle this structure correctly by:
+- Building the Docker image from the `./frontend` directory
+- Deploying to Google Cloud Run with the proper configuration
+
+If you're deploying manually, ensure you specify the correct context directory (`./frontend`) when building Docker images.
+
 ## Overview
 This document summarizes all the deployment configurations added to enable deployment to Google Cloud Platform.
 
@@ -97,30 +105,47 @@ This document summarizes all the deployment configurations added to enable deplo
 
 ## Deployment Options
 
-### Option 1: Google App Engine (Recommended for static sites)
+**Note:** The repository is now structured as a monorepo with the frontend application in the `frontend/` directory.
+
+### Option 1: Google App Engine
 ```bash
+cd frontend
 npm run build
 gcloud app deploy
+cd ..  # Return to repository root
 ```
 **Best for:** Simple deployments, static content
 **Cost:** Free tier available
 **Scaling:** Automatic
 
-### Option 2: Google Cloud Run (Container-based)
+### Option 2: Google Cloud Run (Container-based) - RECOMMENDED
 ```bash
-gcloud builds submit --tag gcr.io/PROJECT_ID/caps-web
-gcloud run deploy caps-web --image gcr.io/PROJECT_ID/caps-web --platform managed --allow-unauthenticated
-```
-**Best for:** Containerized apps, API backends
-**Cost:** Pay per request (very cost-effective)
-**Scaling:** Automatic, scales to zero
+# Deploy using Cloud Build (from repository root)
+gcloud builds submit --config cloudbuild.yaml
 
-### Option 3: Cloud Build (CI/CD)
+# Or manually build and deploy
+gcloud builds submit --tag gcr.io/PROJECT_ID/caps-web ./frontend
+gcloud run deploy caps-web --image gcr.io/PROJECT_ID/caps-web --platform managed --region us-central1 --allow-unauthenticated
+```
+**Best for:** Containerized apps, API backends, future backend services
+**Cost:** Pay per request (very cost-effective), generous free tier
+**Scaling:** Automatic, scales to zero (no cost when idle)
+**Why recommended:** Cloud Run is now preferred because:
+- Works seamlessly with the monorepo structure via the root-level cloudbuild.yaml
+- Provides better support for future backend microservices
+- More cost-effective with scales-to-zero capability
+- Container-based deployment is more portable and consistent
+
+**Note:** The root-level `cloudbuild.yaml` is configured to build from the `frontend/` directory.
+
+### Option 3: Cloud Build (CI/CD) - RECOMMENDED
 ```bash
+# From repository root
 gcloud builds submit --config cloudbuild.yaml
 ```
 **Best for:** Automated deployments from Git
 **Features:** Continuous deployment on push
+**Note:** This method automatically builds and deploys to Cloud Run from the monorepo structure.
 
 ## Environment Variables
 

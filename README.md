@@ -39,4 +39,11 @@ All project documentation is available in the `docs/` folder:
 
 ## Deployment
 
-Deployment instructions are available in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+For Google Cloud Run deployment, use the root-level configuration:
+
+```bash
+# Deploy from repository root
+gcloud builds submit --config cloudbuild.yaml
+```
+
+For detailed deployment instructions and other deployment options, see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
