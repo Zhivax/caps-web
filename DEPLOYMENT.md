@@ -249,7 +249,7 @@ gcloud builds submit --config cloudbuild.yaml --no-source
 
 ## Migrated Deployment References
 
-The following sections consolidate the deployment notes that previously lived in other markdown files.
+The following sections consolidate the deployment notes that previously lived in README.md, PRE_DEPLOYMENT_CHECKLIST.md, and RINGKASAN_DEPLOYMENT.md.
 
 ### Run Locally (for verification)
 1. Install dependencies:
@@ -424,7 +424,7 @@ gcloud run services logs read SERVICE_NAME --region REGION --limit 50
 1. ✅ All deployment configurations are in place
 2. 📝 Set up your Google Cloud project
 3. 🔑 Obtain Gemini API key (if needed)
-4. 🚀 Choose deployment method and follow this DEPLOYMENT guide
+4. 🚀 Choose a deployment method (App Engine, Cloud Run, or Cloud Build) and follow the quick steps above
 5. 📊 Set up monitoring and alerts
 6. 💰 Configure budget alerts
 
