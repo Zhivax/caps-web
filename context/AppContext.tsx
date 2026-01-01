@@ -13,7 +13,7 @@ interface AppContextType {
   notifications: AppNotification[];
   usageHistory: UsageLog[];
   isLoading: boolean;
-  login: (email: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   addFabric: (fabric: Omit<Fabric, 'id' | 'supplierId' | 'supplierName'>) => Promise<void>;
   updateFabric: (fabricId: string, updates: Partial<Pick<Fabric, 'stock' | 'pricePerUnit'>>) => Promise<void>;
@@ -94,12 +94,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setNotifications(prev => [newNotif, ...prev]);
   }, []);
 
-  const login = useCallback(async (email: string) => {
+  const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
-    const userData = await ApiService.login(email);
+    const result = await ApiService.login(email, password);
     setIsLoading(false);
-    if (userData) {
-      setUser(userData);
+    if (result) {
+      setUser(result.user);
       return true;
     }
     return false;
@@ -107,6 +107,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const logout = useCallback(() => {
     setUser(null);
+    ApiService.logout();
     localStorage.removeItem('sc_user');
   }, []);
 
