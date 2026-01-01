@@ -3,10 +3,25 @@
 # API Testing Script for Supply Chain Dashboard
 # This script tests all backend API endpoints to ensure they are working correctly
 
-set -e
+set -euo pipefail
 
 API_BASE="http://localhost:8080"
 BACKEND_BASE="http://localhost:8000"
+
+# Helper function to get JSON array length
+get_json_length() {
+    python3 -c "import sys, json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo "0"
+}
+
+# Helper function to get ISO timestamp (portable across systems)
+get_timestamp() {
+    if date -Iseconds &>/dev/null; then
+        date -Iseconds
+    else
+        # Fallback for systems without -I option (e.g., macOS)
+        date -u +"%Y-%m-%dT%H:%M:%S%z"
+    fi
+}
 
 echo "========================================"
 echo "Supply Chain Dashboard - API Test Suite"
@@ -95,7 +110,7 @@ fi
 echo ""
 echo "📋 Test 5: Get Fabrics"
 RESPONSE=$(curl -s ${API_BASE}/api/fabrics)
-FABRIC_COUNT=$(echo "$RESPONSE" | python3 -c "import sys, json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo "0")
+FABRIC_COUNT=$(echo "$RESPONSE" | get_json_length)
 if [ "$FABRIC_COUNT" -gt 0 ]; then
     echo "✅ Fabrics endpoint working: $FABRIC_COUNT fabrics found"
 else
@@ -118,7 +133,7 @@ fi
 echo ""
 echo "📋 Test 7: Get Fabric Requests"
 RESPONSE=$(curl -s ${API_BASE}/api/requests)
-REQUEST_COUNT=$(echo "$RESPONSE" | python3 -c "import sys, json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo "0")
+REQUEST_COUNT=$(echo "$RESPONSE" | get_json_length)
 if [ "$REQUEST_COUNT" -ge 0 ]; then
     echo "✅ Requests endpoint working: $REQUEST_COUNT requests found"
 else
@@ -130,7 +145,7 @@ fi
 echo ""
 echo "📋 Test 8: Get Hijab Products"
 RESPONSE=$(curl -s ${API_BASE}/api/hijab-products)
-PRODUCT_COUNT=$(echo "$RESPONSE" | python3 -c "import sys, json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo "0")
+PRODUCT_COUNT=$(echo "$RESPONSE" | get_json_length)
 if [ "$PRODUCT_COUNT" -gt 0 ]; then
     echo "✅ Hijab products endpoint working: $PRODUCT_COUNT products found"
 else
@@ -142,14 +157,14 @@ fi
 echo ""
 echo "📋 Test 9: Get Sales"
 RESPONSE=$(curl -s ${API_BASE}/api/sales)
-SALES_COUNT=$(echo "$RESPONSE" | python3 -c "import sys, json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo "0")
+SALES_COUNT=$(echo "$RESPONSE" | get_json_length)
 echo "✅ Sales endpoint working: $SALES_COUNT sales records found"
 
 # Test 10: Get usage history
 echo ""
 echo "📋 Test 10: Get Usage History"
 RESPONSE=$(curl -s ${API_BASE}/api/usage-history)
-USAGE_COUNT=$(echo "$RESPONSE" | python3 -c "import sys, json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo "0")
+USAGE_COUNT=$(echo "$RESPONSE" | get_json_length)
 echo "✅ Usage history endpoint working: $USAGE_COUNT usage records found"
 
 # Test 11: Create a new request
@@ -168,7 +183,7 @@ RESPONSE=$(curl -s -X POST ${API_BASE}/api/requests \
         "fabricColor": "Dusty Rose",
         "quantity": 5.0,
         "status": "PENDING",
-        "timestamp": "'$(date -Iseconds)'"
+        "timestamp": "'$(get_timestamp)'"
     }')
 if echo "$RESPONSE" | grep -q "Request created successfully"; then
     echo "✅ Create request working"

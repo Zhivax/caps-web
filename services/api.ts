@@ -1,15 +1,13 @@
 
 import { Fabric, HijabProduct, FabricRequest, HijabSale, User, UserRole, RequestStatus, UsageLog } from '../types';
 
-// API base URL - Use proxy in development, full URL in production
-// In development with Vite proxy, we can use empty string to use relative URLs
-// which will be proxied to the backend
+// API base URL configuration
+// For development with Vite's proxy, we use relative paths by default
+// Set VITE_DISABLE_PROXY=true in .env to use full URLs even in development
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
-// For development with Vite's proxy, we can use relative paths
-// The proxy will forward /api/* requests to the backend
 const isDevelopment = import.meta.env.DEV;
-const BASE_URL = isDevelopment ? '' : API_BASE_URL;
+const disableProxy = import.meta.env.VITE_DISABLE_PROXY === 'true';
+const BASE_URL = (isDevelopment && !disableProxy) ? '' : API_BASE_URL;
 
 async function fetchApi(endpoint: string, options?: RequestInit) {
   const response = await fetch(`${BASE_URL}${endpoint}`, {
