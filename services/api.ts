@@ -59,6 +59,7 @@ class InputSanitizer {
     let sanitized = input.replace(/[\x00-\x1F\x7F]/g, '');
     
     // Encode HTML special characters to prevent XSS
+    // Using textContent ensures proper escaping
     const div = document.createElement('div');
     div.textContent = sanitized;
     sanitized = div.innerHTML;
@@ -66,12 +67,9 @@ class InputSanitizer {
     return sanitized.trim();
   }
 
-  static sanitizeHTML(html: string): string {
-    // Remove script tags and event handlers
-    let sanitized = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-    sanitized = sanitized.replace(/on\w+\s*=\s*["'][^"']*["']/gi, '');
-    return sanitized;
-  }
+  // NOTE: For HTML content sanitization in production, use DOMPurify library
+  // https://github.com/cure53/DOMPurify
+  // Regex-based HTML sanitization is NOT secure against all XSS vectors
 }
 
 // Secure fetch with automatic token handling
