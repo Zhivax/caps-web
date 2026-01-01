@@ -153,6 +153,14 @@ class HijabProduct(BaseModel):
     threshold: int = Field(..., ge=0)
     fabricId: str
 
+class HijabSaleRequest(BaseModel):
+    """Request to record a sale (without id and timestamp)"""
+    productId: str
+    productName: str = Field(..., min_length=1, max_length=100)
+    quantity: int = Field(..., gt=0)
+    trackingNumber: str = Field(..., min_length=1, max_length=100)
+    date: str
+
 class HijabSale(BaseModel):
     id: str
     productId: str
@@ -763,7 +771,7 @@ async def get_sales(current_user: TokenData = Depends(get_current_active_user)):
 
 @app.post("/api/sales")
 async def record_sale(
-    sale: HijabSale,
+    sale_request: HijabSaleRequest,
     current_user: TokenData = Depends(get_current_active_user)
 ):
     """
@@ -777,7 +785,7 @@ async def record_sale(
         )
     
     # ✅ BACKEND VALIDATION: Check product exists
-    product = next((p for p in HIJAB_PRODUCTS if p.id == sale.productId), None)
+    product = next((p for p in HIJAB_PRODUCTS if p.id == sale_request.productId), None)
     if not product:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -785,23 +793,26 @@ async def record_sale(
         )
     
     # ✅ BACKEND VALIDATION: Check stock availability
-    if product.stock < sale.quantity:
+    if product.stock < sale_request.quantity:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Insufficient stock. Available: {product.stock}, Requested: {sale.quantity}"
+            detail=f"Insufficient stock. Available: {product.stock}, Requested: {sale_request.quantity}"
         )
     
     # ✅ BACKEND CALCULATION: Deduct stock
-    product.stock -= sale.quantity
+    product.stock -= sale_request.quantity
     
-    # Sanitize inputs
-    sale.productName = InputSanitizer.sanitize_string(sale.productName, 100)
-    sale.trackingNumber = InputSanitizer.sanitize_string(sale.trackingNumber, 100)
-    
-    # Generate ID in backend (secure)
+    # Sanitize inputs and create sale object
     import uuid
-    sale.id = f"sale-{uuid.uuid4()}"
-    sale.timestamp = datetime.now().isoformat()
+    sale = HijabSale(
+        id=f"sale-{uuid.uuid4()}",
+        productId=sale_request.productId,
+        productName=InputSanitizer.sanitize_string(sale_request.productName, 100),
+        quantity=sale_request.quantity,
+        trackingNumber=InputSanitizer.sanitize_string(sale_request.trackingNumber, 100),
+        date=sale_request.date,
+        timestamp=datetime.now().isoformat()
+    )
     
     SALES.insert(0, sale)
     AuditLogger.log_sensitive_operation(current_user.user_id, "RECORD_SALE", sale.id)
