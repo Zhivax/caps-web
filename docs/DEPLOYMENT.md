@@ -107,11 +107,12 @@ This document summarizes all the deployment configurations added to enable deplo
 
 **Note:** The repository is now structured as a monorepo with the frontend application in the `frontend/` directory.
 
-### Option 1: Google App Engine (Recommended for static sites)
+### Option 1: Google App Engine
 ```bash
 cd frontend
 npm run build
 gcloud app deploy
+cd ..  # Return to repository root
 ```
 **Best for:** Simple deployments, static content
 **Cost:** Free tier available
@@ -126,9 +127,15 @@ gcloud builds submit --config cloudbuild.yaml
 gcloud builds submit --tag gcr.io/PROJECT_ID/caps-web ./frontend
 gcloud run deploy caps-web --image gcr.io/PROJECT_ID/caps-web --platform managed --region us-central1 --allow-unauthenticated
 ```
-**Best for:** Containerized apps, API backends
-**Cost:** Pay per request (very cost-effective)
-**Scaling:** Automatic, scales to zero
+**Best for:** Containerized apps, API backends, future backend services
+**Cost:** Pay per request (very cost-effective), generous free tier
+**Scaling:** Automatic, scales to zero (no cost when idle)
+**Why recommended:** Cloud Run is now preferred because:
+- Works seamlessly with the monorepo structure via the root-level cloudbuild.yaml
+- Provides better support for future backend microservices
+- More cost-effective with scales-to-zero capability
+- Container-based deployment is more portable and consistent
+
 **Note:** The root-level `cloudbuild.yaml` is configured to build from the `frontend/` directory.
 
 ### Option 3: Cloud Build (CI/CD) - RECOMMENDED
