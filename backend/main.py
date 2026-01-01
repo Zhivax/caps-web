@@ -190,6 +190,22 @@ class FabricRequest(BaseModel):
 class RequestStatusUpdate(BaseModel):
     status: str = Field(..., pattern="^(PENDING|WAITING_VERIFICATION|APPROVED|SHIPPED|REJECTED|CANCELLED|COMPLETED)$")
 
+class ProductionRequest(BaseModel):
+    """Request to produce hijab products"""
+    productId: str
+    quantity: int = Field(..., gt=0)
+    fabricUsed: float = Field(..., gt=0)
+
+class UMKMFabric(BaseModel):
+    """UMKM fabric storage (local warehouse)"""
+    id: str
+    umkmId: str
+    fabricId: str
+    fabricName: str = Field(..., min_length=1, max_length=100)
+    fabricColor: str = Field(..., min_length=1, max_length=50)
+    quantity: float = Field(..., ge=0)
+
+
 # ===== In-memory database =====
 # Initialize with extensive mock data
 # Default password for all demo users: "password123"
@@ -355,6 +371,7 @@ REQUESTS = [
 
 SALES: List[HijabSale] = []
 USAGE_HISTORY: List[UsageLog] = []
+UMKM_FABRICS: List[UMKMFabric] = []  # UMKM local fabric storage
 
 # ===== API Endpoints =====
 
@@ -621,7 +638,10 @@ async def update_request_status(
     update: RequestStatusUpdate,
     current_user: TokenData = Depends(get_current_active_user)
 ):
-    """Update request status (role-based permissions)"""
+    """
+    Update request status (role-based permissions)
+    ✅ BACKEND VALIDATION - Stock check & deduction when approving
+    """
     request = next((r for r in REQUESTS if r.id == request_id), None)
     if not request:
         raise HTTPException(status_code=404, detail="Request not found")
@@ -639,6 +659,30 @@ async def update_request_status(
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You can only update requests for your fabrics"
+            )
+        
+        # ✅ BACKEND VALIDATION: Check stock when approving
+        if update.status == "APPROVED":
+            fabric = next((f for f in FABRICS if f.id == request.fabricId), None)
+            if not fabric:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Fabric not found"
+                )
+            
+            # Check stock availability
+            if fabric.stock < request.quantity:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Insufficient fabric stock. Available: {fabric.stock}m, Requested: {request.quantity}m"
+                )
+            
+            # ✅ BACKEND CALCULATION: Deduct stock
+            fabric.stock -= request.quantity
+            AuditLogger.log_sensitive_operation(
+                current_user.user_id, 
+                "DEDUCT_FABRIC_STOCK", 
+                f"{fabric.id}:{request.quantity}"
             )
     
     elif current_user.role == "UMKM":
@@ -663,6 +707,7 @@ async def update_request_status(
     )
     
     return {"message": "Request status updated successfully", "request": request}
+
 
 
 @app.get("/api/hijab-products", response_model=List[HijabProduct])
@@ -721,21 +766,51 @@ async def record_sale(
     sale: HijabSale,
     current_user: TokenData = Depends(get_current_active_user)
 ):
-    """Record a new hijab sale (UMKM role only)"""
+    """
+    Record a new hijab sale (UMKM role only) 
+    ✅ BACKEND VALIDATION - Stock check & deduction
+    """
     if current_user.role != "UMKM":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only UMKM users can record sales"
         )
     
+    # ✅ BACKEND VALIDATION: Check product exists
+    product = next((p for p in HIJAB_PRODUCTS if p.id == sale.productId), None)
+    if not product:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
+    
+    # ✅ BACKEND VALIDATION: Check stock availability
+    if product.stock < sale.quantity:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Insufficient stock. Available: {product.stock}, Requested: {sale.quantity}"
+        )
+    
+    # ✅ BACKEND CALCULATION: Deduct stock
+    product.stock -= sale.quantity
+    
     # Sanitize inputs
     sale.productName = InputSanitizer.sanitize_string(sale.productName, 100)
     sale.trackingNumber = InputSanitizer.sanitize_string(sale.trackingNumber, 100)
     
+    # Generate ID in backend (secure)
+    import uuid
+    sale.id = f"sale-{uuid.uuid4()}"
+    sale.timestamp = datetime.now().isoformat()
+    
     SALES.insert(0, sale)
     AuditLogger.log_sensitive_operation(current_user.user_id, "RECORD_SALE", sale.id)
     
-    return {"message": "Sale recorded successfully", "sale": sale}
+    return {
+        "message": "Sale recorded successfully", 
+        "sale": sale,
+        "updated_stock": product.stock
+    }
 
 @app.get("/api/usage-history", response_model=List[UsageLog])
 async def get_usage_history(current_user: TokenData = Depends(get_current_active_user)):
@@ -767,6 +842,136 @@ async def record_usage(
     AuditLogger.log_sensitive_operation(current_user.user_id, "RECORD_USAGE", log.id)
     
     return {"message": "Usage recorded successfully", "log": log}
+
+
+# ===== UMKM Fabric Storage Endpoints =====
+
+@app.get("/api/umkm-fabrics", response_model=List[UMKMFabric])
+async def get_umkm_fabrics(current_user: TokenData = Depends(get_current_active_user)):
+    """Get UMKM fabric storage (local warehouse)"""
+    if current_user.role != "UMKM":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only UMKM users can view fabric storage"
+        )
+    # Return only fabrics for current UMKM
+    return [f for f in UMKM_FABRICS if f.umkmId == current_user.user_id]
+
+
+@app.post("/api/umkm-fabrics/add")
+async def add_umkm_fabric(
+    fabric: UMKMFabric,
+    current_user: TokenData = Depends(get_current_active_user)
+):
+    """Add fabric to UMKM storage (called when request is completed)"""
+    if current_user.role != "UMKM":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only UMKM users can add fabric to storage"
+        )
+    
+    # Verify ownership
+    if fabric.umkmId != current_user.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only add fabric to your own storage"
+        )
+    
+    # Check if fabric already exists
+    existing = next((f for f in UMKM_FABRICS if f.umkmId == fabric.umkmId and f.fabricId == fabric.fabricId), None)
+    if existing:
+        # Update quantity
+        existing.quantity += fabric.quantity
+    else:
+        # Add new fabric
+        import uuid
+        fabric.id = f"uf-{uuid.uuid4()}"
+        UMKM_FABRICS.append(fabric)
+    
+    AuditLogger.log_sensitive_operation(current_user.user_id, "ADD_UMKM_FABRIC", fabric.fabricId)
+    
+    return {"message": "Fabric added to storage successfully", "fabric": fabric}
+
+
+# ===== Production Endpoints =====
+
+@app.post("/api/production/produce")
+async def produce_hijab(
+    production: ProductionRequest,
+    current_user: TokenData = Depends(get_current_active_user)
+):
+    """
+    Produce hijab products - BUSINESS LOGIC IN BACKEND
+    ✅ BACKEND VALIDATION - Fabric availability check
+    ✅ BACKEND CALCULATION - Stock updates & fabric deduction
+    """
+    if current_user.role != "UMKM":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only UMKM users can produce products"
+        )
+    
+    # ✅ BACKEND VALIDATION: Find product
+    product = next((p for p in HIJAB_PRODUCTS if p.id == production.productId), None)
+    if not product:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
+    
+    # Verify ownership
+    if product.umkmId != current_user.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only produce your own products"
+        )
+    
+    # ✅ BACKEND VALIDATION: Check fabric availability in UMKM storage
+    umkm_fabric = next(
+        (f for f in UMKM_FABRICS if f.umkmId == current_user.user_id and f.fabricId == product.fabricId), 
+        None
+    )
+    
+    if not umkm_fabric or umkm_fabric.quantity < production.fabricUsed:
+        available = umkm_fabric.quantity if umkm_fabric else 0
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Insufficient raw materials in warehouse. Available: {available}m, Required: {production.fabricUsed}m"
+        )
+    
+    # ✅ BACKEND CALCULATION: Deduct fabric from UMKM storage
+    umkm_fabric.quantity -= production.fabricUsed
+    
+    # ✅ BACKEND CALCULATION: Add to product stock
+    product.stock += production.quantity
+    
+    # Create usage log
+    import uuid
+    usage_log = UsageLog(
+        id=f"uh-{uuid.uuid4()}",
+        productId=product.id,
+        productName=product.name,
+        fabricId=product.fabricId,
+        fabricName=umkm_fabric.fabricName,
+        fabricUsed=production.fabricUsed,
+        quantityProduced=production.quantity,
+        timestamp=datetime.now().isoformat()
+    )
+    USAGE_HISTORY.insert(0, usage_log)
+    
+    AuditLogger.log_sensitive_operation(
+        current_user.user_id, 
+        "PRODUCE_HIJAB", 
+        f"{product.id}:{production.quantity}"
+    )
+    
+    return {
+        "message": "Production recorded successfully",
+        "product": product,
+        "usage_log": usage_log,
+        "remaining_fabric": umkm_fabric.quantity
+    }
+
 
 if __name__ == "__main__":
     import uvicorn
