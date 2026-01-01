@@ -320,7 +320,11 @@ def get_hijab_products():
 
 @app.post("/api/hijab-products")
 def create_or_update_hijab_product(product: HijabProduct):
-    """Create new or update existing hijab product"""
+    """Create new or update existing hijab product.
+    
+    Note: This endpoint handles both creation and updates (upsert pattern).
+    In a production REST API, consider splitting into POST (create) and PUT/PATCH (update).
+    """
     existing = next((p for p in HIJAB_PRODUCTS if p.id == product.id), None)
     if existing:
         idx = HIJAB_PRODUCTS.index(existing)
