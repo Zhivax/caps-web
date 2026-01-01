@@ -2,21 +2,36 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { UserRole } from '../types';
-import { Lock, Mail, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Lock, Mail, ArrowRight, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 
 export const Login: React.FC = () => {
   const { login } = useApp();
   const [email, setEmail] = useState('umkm@example.com');
-  const [password, setPassword] = useState('password');
+  const [password, setPassword] = useState('password123');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const success = login(email);
-    if (!success) {
-      setError('Invalid email or password. Use demo accounts.');
+    setIsLoading(true);
+    
+    try {
+      const success = await login(email, password);
+      if (!success) {
+        setError('Invalid email or password. Please try again.');
+      }
+    } catch (err) {
+      setError('An error occurred during login. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const setDemoCredentials = (userEmail: string) => {
+    setEmail(userEmail);
+    setPassword('password123');
   };
 
   return (
@@ -29,12 +44,26 @@ export const Login: React.FC = () => {
               <ShieldCheck size={28} className="text-slate-900" />
             </div>
             <h1 className="text-3xl font-bold mb-3 leading-tight">UMKM SupplyChain Hub</h1>
-            <p className="text-slate-300 text-base leading-relaxed">
+            <p className="text-slate-300 text-base leading-relaxed mb-6">
               Real-time synchronization between Hijab Producers and Fabric Suppliers. Monitor stock, request materials, and grow together.
             </p>
+            <div className="space-y-2 text-sm text-slate-400">
+              <div className="flex items-center">
+                <ShieldCheck size={16} className="mr-2" />
+                <span>JWT Token Authentication</span>
+              </div>
+              <div className="flex items-center">
+                <ShieldCheck size={16} className="mr-2" />
+                <span>Role-Based Access Control</span>
+              </div>
+              <div className="flex items-center">
+                <ShieldCheck size={16} className="mr-2" />
+                <span>End-to-End Encryption</span>
+              </div>
+            </div>
           </div>
           <div className="hidden md:block">
-            <p className="text-slate-400 text-xs">© 2024 SupplyChain Integration Platform</p>
+            <p className="text-slate-400 text-xs">© 2024 SupplyChain Integration Platform - Secured</p>
           </div>
         </div>
 
@@ -42,7 +71,7 @@ export const Login: React.FC = () => {
         <div className="md:w-1/2 p-8 md:p-12 bg-white">
           <div className="mb-8">
             <h2 className="text-2xl font-semibold text-slate-900">Welcome back</h2>
-            <p className="text-slate-500 text-sm mt-1">Sign in to your dashboard</p>
+            <p className="text-slate-500 text-sm mt-1">Sign in to your secure dashboard</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -57,6 +86,7 @@ export const Login: React.FC = () => {
                   className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900"
                   placeholder="name@example.com"
                   required
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -66,13 +96,22 @@ export const Login: React.FC = () => {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
-                  type="password" 
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900"
+                  className="w-full pl-10 pr-12 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900"
                   placeholder="••••••••"
                   required
+                  disabled={isLoading}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  disabled={isLoading}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 
@@ -84,26 +123,29 @@ export const Login: React.FC = () => {
 
             <button 
               type="submit"
-              className="w-full py-3 bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-800 shadow-soft flex items-center justify-center space-x-2"
+              disabled={isLoading}
+              className="w-full py-3 bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-800 shadow-soft flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>Sign in</span>
-              <ArrowRight size={18} />
+              <span>{isLoading ? 'Signing in...' : 'Sign in'}</span>
+              {!isLoading && <ArrowRight size={18} />}
             </button>
           </form>
 
           <div className="mt-8 pt-6 border-t border-slate-200">
-            <p className="text-xs font-medium text-slate-500 mb-3">Demo accounts</p>
+            <p className="text-xs font-medium text-slate-500 mb-3">Demo accounts (password: password123)</p>
             <div className="grid grid-cols-2 gap-3">
               <button 
-                onClick={() => setEmail('umkm@example.com')}
+                onClick={() => setDemoCredentials('umkm@example.com')}
                 className="p-3 bg-slate-50 rounded-xl text-left border border-slate-200 hover:border-slate-300 hover:bg-slate-100"
+                disabled={isLoading}
               >
                 <p className="text-[10px] font-semibold text-slate-500 uppercase mb-0.5">UMKM</p>
                 <p className="text-xs font-medium text-slate-900">umkm@example.com</p>
               </button>
               <button 
-                onClick={() => setEmail('supplier@example.com')}
+                onClick={() => setDemoCredentials('supplier@example.com')}
                 className="p-3 bg-slate-50 rounded-xl text-left border border-slate-200 hover:border-slate-300 hover:bg-slate-100"
+                disabled={isLoading}
               >
                 <p className="text-[10px] font-semibold text-slate-500 uppercase mb-0.5">Supplier</p>
                 <p className="text-xs font-medium text-slate-900">supplier@example.com</p>
