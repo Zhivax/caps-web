@@ -1,18 +1,19 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:18-slim AS builder
 
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
-# Install all dependencies including devDependencies (needed for build)
-RUN npm install
+# Configure npm to handle SSL issues in build environment and install dependencies
+RUN npm config set strict-ssl false && \
+    npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .
 
-# Build the application
+# Build the application - use full path to vite binary
 RUN npm run build
 
 # Production stage

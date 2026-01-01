@@ -7,9 +7,10 @@ Supply Chain Dashboard Application
 ```
 caps-web/
 ├── frontend/          # React + Vite frontend application
-├── backend/           # Backend services (to be implemented)
 └── docs/              # Project documentation
 ```
+
+Note: Backend will be developed in a separate repository.
 
 ## Getting Started
 
@@ -22,10 +23,6 @@ npm run dev
 ```
 
 See `frontend/README.md` for detailed frontend documentation.
-
-### Backend
-
-Backend implementation will be added in the `backend/` folder.
 
 ## Documentation
 
