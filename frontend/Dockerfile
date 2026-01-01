@@ -7,6 +7,8 @@ WORKDIR /app
 COPY package*.json ./
 
 # Configure npm to handle SSL issues in build environment and install dependencies
+# Note: strict-ssl=false is needed for some CI/CD environments with SSL interception
+# In production, ensure your build environment has proper SSL certificates configured
 RUN npm config set strict-ssl false && \
     npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
