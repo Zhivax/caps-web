@@ -68,15 +68,29 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         return;
       }
 
+      // Helper to handle optional API calls that may fail for certain roles
+      const fetchWithFallback = async <T,>(
+        fetchFn: () => Promise<T>,
+        fallback: T,
+        errorMsg: string
+      ): Promise<T> => {
+        try {
+          return await fetchFn();
+        } catch (err) {
+          console.warn(errorMsg, err);
+          return fallback;
+        }
+      };
+
       setIsLoading(true);
       try {
         const [f, r, h, s, uh, uf] = await Promise.all([
           ApiService.getFabrics(),
           ApiService.getRequests(),
           ApiService.getHijabProducts(),
-          ApiService.getSales().catch((err) => { console.warn('Failed to fetch sales:', err); return []; }), // May fail for suppliers
-          ApiService.getUsageHistory().catch((err) => { console.warn('Failed to fetch usage history:', err); return []; }), // May fail for suppliers
-          ApiService.getUmkmFabrics().catch((err) => { console.warn('Failed to fetch UMKM fabrics:', err); return []; }) // May fail for suppliers
+          fetchWithFallback(ApiService.getSales, [], 'Failed to fetch sales:'),
+          fetchWithFallback(ApiService.getUsageHistory, [], 'Failed to fetch usage history:'),
+          fetchWithFallback(ApiService.getUmkmFabrics, [], 'Failed to fetch UMKM fabrics:')
         ]);
         setFabrics(f);
         setRequests(r);
