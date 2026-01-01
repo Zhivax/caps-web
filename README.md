@@ -94,7 +94,7 @@ cd ..
 # Install dependencies
 npm install
 
-# Create .env file (optional - defaults to http://localhost:8000)
+# Create .env file (recommended for API configuration)
 cp .env.example .env
 
 # Run development server
@@ -102,6 +102,19 @@ npm run dev
 ```
 
 The frontend will be available at `http://localhost:8080`
+
+**Note:** The application uses Vite's proxy configuration to avoid CORS issues during development. All `/api/*` requests are automatically proxied to the backend at `http://localhost:8000`.
+
+### 4. Verify Setup (Optional)
+
+Run the comprehensive API test script to verify all endpoints:
+
+```bash
+# Make sure both backend and frontend are running
+./test-api.sh
+```
+
+This will test all API endpoints and confirm that login, CRUD operations, and data flow are working correctly.
 
 ### 4. Login
 
@@ -118,6 +131,25 @@ Use one of the demo accounts:
 Other accounts available:
 - `umkm2@example.com`, `umkm3@example.com`
 - `supplier2@example.com` through `supplier7@example.com`
+
+## 🔧 Troubleshooting
+
+### CORS Issues
+If you encounter CORS errors:
+1. Ensure both backend and frontend servers are running
+2. Backend should be on `http://localhost:8000`
+3. Frontend should be on `http://localhost:8080`
+4. The Vite proxy configuration automatically handles CORS
+
+For detailed troubleshooting, see [API_SETUP.md](./API_SETUP.md)
+
+### Testing APIs
+Run the comprehensive test suite:
+```bash
+./test-api.sh
+```
+
+This tests all endpoints including login, fabrics, requests, products, sales, and usage history.
 
 ## 📊 Mock Data
 
