@@ -279,15 +279,17 @@ export const ApiService = {
     return fetchApi('/api/sales');
   },
 
-  async recordSale(sale: HijabSale): Promise<void> {
-    // Sanitize input
+  async recordSale(sale: Omit<HijabSale, 'id' | 'timestamp'>): Promise<{sale: HijabSale, updated_stock: number}> {
+    // ✅ Frontend only sanitizes and sends - Backend validates & calculates
     const sanitizedSale = {
-      ...sale,
+      productId: sale.productId,
       productName: InputSanitizer.sanitizeString(sale.productName),
+      quantity: sale.quantity,
       trackingNumber: InputSanitizer.sanitizeString(sale.trackingNumber),
+      date: sale.date,
     };
     
-    await fetchApi('/api/sales', {
+    return fetchApi('/api/sales', {
       method: 'POST',
       body: JSON.stringify(sanitizedSale),
     });
@@ -308,6 +310,36 @@ export const ApiService = {
     await fetchApi('/api/usage-history', {
       method: 'POST',
       body: JSON.stringify(sanitizedLog),
+    });
+  },
+
+  // ===== New UMKM Fabric Storage Endpoints =====
+  
+  async getUmkmFabrics(): Promise<any[]> {
+    return fetchApi('/api/umkm-fabrics');
+  },
+
+  async addUmkmFabric(fabric: any): Promise<void> {
+    await fetchApi('/api/umkm-fabrics/add', {
+      method: 'POST',
+      body: JSON.stringify(fabric),
+    });
+  },
+
+  // ===== New Production Endpoint =====
+  
+  async produceHijab(productId: string, quantity: number, fabricUsed: number): Promise<{
+    product: any;
+    usage_log: any;
+    remaining_fabric: number;
+  }> {
+    return fetchApi('/api/production/produce', {
+      method: 'POST',
+      body: JSON.stringify({
+        productId,
+        quantity,
+        fabricUsed,
+      }),
     });
   }
 };
