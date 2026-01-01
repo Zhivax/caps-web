@@ -30,7 +30,7 @@ const InventoryChart: React.FC<{ data: ChartData[] }> = memo(({ data }) => {
       </div>
       
       <div className="flex-1 min-h-[350px]">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height={350}>
           <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
             <XAxis 
