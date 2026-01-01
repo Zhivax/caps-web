@@ -29,19 +29,19 @@ const StatCard: React.FC<{
   trendUp?: boolean;
   color: string;
 }> = memo(({ title, value, icon, trend, trendUp, color }) => (
-  <div className="bg-white/80 backdrop-blur-xl p-6 rounded-3xl border border-slate-200/60 shadow-lg shadow-indigo-50 transition-all hover:-translate-y-0.5 hover:shadow-xl">
-    <div className="flex items-center justify-between mb-4">
-      <div className={`p-3 rounded-2xl ${color} text-white shadow-lg shadow-indigo-200/50`}>
+  <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-soft hover:shadow-medium transition-shadow">
+    <div className="flex items-center justify-between mb-3">
+      <div className={`p-2.5 rounded-lg ${color} text-white`}>
         {icon}
       </div>
       {trend && (
-        <span className={`text-xs font-black flex items-center px-2 py-1 rounded-full ${trendUp ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
-          {trend} {trendUp ? <ArrowUpRight size={14} className="ml-1" /> : <ArrowDownRight size={14} className="ml-1" />}
+        <span className={`text-xs font-medium flex items-center px-2 py-1 rounded-md ${trendUp ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+          {trend} {trendUp ? <ArrowUpRight size={12} className="ml-0.5" /> : <ArrowDownRight size={12} className="ml-0.5" />}
         </span>
       )}
     </div>
-    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">{title}</p>
-    <h3 className="text-2xl font-black text-slate-800 tracking-tight">{value}</h3>
+    <p className="text-xs text-slate-500 font-medium mb-1">{title}</p>
+    <h3 className="text-2xl font-semibold text-slate-900">{value}</h3>
   </div>
 ));
 
@@ -60,14 +60,14 @@ export const Dashboard: React.FC = () => {
   if (isLoading) return null;
 
   const renderHeader = () => (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
       <div>
-        <h3 className="text-lg font-black text-slate-800 uppercase tracking-widest flex items-center gap-3">
-          <LayoutDashboard className="text-indigo-600" size={24} />
-          {isUMKM ? 'Executive Dashboard' : 'Supplier Console'}
+        <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-3">
+          <LayoutDashboard className="text-slate-900" size={24} />
+          {isUMKM ? 'Dashboard' : 'Supplier Dashboard'}
         </h3>
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 ml-9">
-          {isUMKM ? 'Global overview of your supply chain performance' : 'Monitor warehouse levels and UMKM partnerships'}
+        <p className="text-sm text-slate-500 mt-1">
+          {isUMKM ? 'Overview of your supply chain performance' : 'Monitor warehouse levels and partnerships'}
         </p>
       </div>
     </div>
@@ -80,36 +80,36 @@ export const Dashboard: React.FC = () => {
     const lowStockAlerts = hijabProducts.filter(p => p.stock < p.threshold).length;
 
     return (
-      <div className="space-y-8 animate-in fade-in duration-300">
+      <div className="space-y-6">
         {renderHeader()}
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard title="Total Hijab Stock" value={totalHijabStock} icon={<Package size={20} />} trend="+12%" trendUp color="bg-indigo-600" />
-          <StatCard title="Active Suppliers" value={activeSuppliers} icon={<Users size={20} />} color="bg-blue-600" />
-          <StatCard title="Active Requests" value={pendingRequests} icon={<Clock size={20} />} trend="-2" trendUp={false} color="bg-amber-600" />
-          <StatCard title="Low Stock Items" value={lowStockAlerts} icon={<AlertTriangle size={20} />} color="bg-rose-600" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard title="Total Hijab Stock" value={totalHijabStock} icon={<Package size={18} />} trend="+12%" trendUp color="bg-slate-900" />
+          <StatCard title="Active Suppliers" value={activeSuppliers} icon={<Users size={18} />} color="bg-blue-600" />
+          <StatCard title="Active Requests" value={pendingRequests} icon={<Clock size={18} />} trend="-2" trendUp={false} color="bg-amber-500" />
+          <StatCard title="Low Stock Items" value={lowStockAlerts} icon={<AlertTriangle size={18} />} color="bg-red-600" />
         </div>
 
-        <ViewportAware placeholderHeight="450px" className="bg-white/85 backdrop-blur-xl p-8 rounded-[2.5rem] border border-slate-200/70 shadow-lg shadow-indigo-50 flex flex-col">
+        <ViewportAware placeholderHeight="400px" className="bg-white p-6 rounded-xl border border-slate-200 shadow-soft">
           <Suspense fallback={<div className="h-full w-full flex items-center justify-center opacity-20"><RefreshCw className="animate-spin" /></div>}>
             <InventoryChart data={chartData} />
           </Suspense>
         </ViewportAware>
 
-        <ViewportAware placeholderHeight="300px" className="bg-white/85 backdrop-blur-xl p-8 rounded-[2.5rem] border border-slate-200/70 shadow-lg shadow-indigo-50">
-           <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-8 flex items-center">
-              <ClockIcon size={18} className="mr-3 text-amber-600" /> Partner Fabric Catalog Status
+        <ViewportAware placeholderHeight="300px" className="bg-white p-6 rounded-xl border border-slate-200 shadow-soft">
+           <h4 className="text-sm font-semibold text-slate-900 mb-6 flex items-center">
+              <ClockIcon size={18} className="mr-2 text-amber-500" /> Fabric Catalog Status
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {fabrics.slice(0, 9).map(f => (
-                <div key={f.id} className="flex items-center justify-between p-5 rounded-3xl bg-slate-50 border border-slate-100 hover:border-indigo-200 transition-colors group">
+                <div key={f.id} className="flex items-center justify-between p-4 rounded-lg bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors">
                   <div className="min-w-0">
-                    <p className="text-xs font-black text-slate-800 truncate">{f.name}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">{f.supplierName}</p>
+                    <p className="text-sm font-medium text-slate-900 truncate">{f.name}</p>
+                    <p className="text-xs text-slate-500 truncate">{f.supplierName}</p>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-black text-indigo-600">{f.stock}m</p>
-                    <span className={`text-[8px] font-black uppercase tracking-tighter px-2 py-0.5 rounded ${f.stock > 20 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                  <div className="text-right shrink-0 ml-4">
+                    <p className="text-sm font-semibold text-slate-900">{f.stock}m</p>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded ${f.stock > 20 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                       {f.stock > 20 ? 'In Stock' : 'Limited'}
                     </span>
                   </div>
@@ -127,40 +127,40 @@ export const Dashboard: React.FC = () => {
     const incomingRequests = myRequests.filter(r => r.status === RequestStatus.PENDING).length;
 
     return (
-      <div className="space-y-8 animate-in fade-in duration-300">
+      <div className="space-y-6">
         {renderHeader()}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard title="Material Types" value={myFabrics.length} icon={<Package size={20} />} color="bg-indigo-600" />
-          <StatCard title="Total Ready Stock" value={`${totalStock}m`} icon={<TrendingUp size={20} />} trend="+450m" trendUp color="bg-emerald-600" />
-          <StatCard title="New Orders" value={incomingRequests} icon={<ShoppingCart size={20} />} trend="+2" trendUp color="bg-amber-600" />
-          <StatCard title="Order History" value={myRequests.length} icon={<HistoryIcon size={20} />} color="bg-slate-700" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard title="Material Types" value={myFabrics.length} icon={<Package size={18} />} color="bg-slate-900" />
+          <StatCard title="Total Ready Stock" value={`${totalStock}m`} icon={<TrendingUp size={18} />} trend="+450m" trendUp color="bg-green-600" />
+          <StatCard title="New Orders" value={incomingRequests} icon={<ShoppingCart size={18} />} trend="+2" trendUp color="bg-amber-500" />
+          <StatCard title="Order History" value={myRequests.length} icon={<HistoryIcon size={18} />} color="bg-slate-700" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <ViewportAware placeholderHeight="400px" className="bg-white/85 backdrop-blur-xl p-8 rounded-[2.5rem] border border-slate-200/70 shadow-lg shadow-indigo-50">
-            <div className="flex items-center justify-between mb-8">
-              <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">Incoming Fabric Requests</h4>
-              <div className="flex gap-2">
-                <span className="px-3 py-1 bg-amber-50 text-amber-600 text-[10px] font-black rounded-full uppercase">Action Required</span>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ViewportAware placeholderHeight="400px" className="bg-white p-6 rounded-xl border border-slate-200 shadow-soft">
+            <div className="flex items-center justify-between mb-6">
+              <h4 className="text-sm font-semibold text-slate-900">Incoming Fabric Requests</h4>
+              {myRequests.filter(r => r.status === RequestStatus.PENDING).length > 0 && (
+                <span className="px-2.5 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-md">Action Required</span>
+              )}
             </div>
             {myRequests.filter(r => r.status === RequestStatus.PENDING).length === 0 ? (
-              <div className="text-center py-24 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
-                <ClockIcon size={48} className="mx-auto mb-4 text-slate-200" />
-                <p className="text-xs font-black text-slate-400 uppercase tracking-widest">No pending requests</p>
+              <div className="text-center py-20 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                <ClockIcon size={40} className="mx-auto mb-3 text-slate-300" />
+                <p className="text-sm text-slate-500">No pending requests</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {myRequests.filter(r => r.status === RequestStatus.PENDING).map(r => (
-                  <div key={r.id} className="flex items-center justify-between p-6 rounded-3xl border border-slate-100 hover:bg-slate-50 transition-all hover:border-indigo-100">
+                  <div key={r.id} className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
                     <div>
-                      <p className="text-xs font-black text-slate-800">{r.umkmName}</p>
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Requesting {r.quantity}m of {r.fabricName}</p>
+                      <p className="text-sm font-medium text-slate-900">{r.umkmName}</p>
+                      <p className="text-xs text-slate-500">Requesting {r.quantity}m of {r.fabricName}</p>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-[10px] font-black text-slate-300 uppercase">{new Date(r.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      <button className="px-5 py-2.5 bg-indigo-600 text-white text-[10px] font-black rounded-xl uppercase tracking-widest hover:bg-indigo-700 shadow-lg shadow-indigo-100">Details</button>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-slate-400">{new Date(r.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      <button className="px-4 py-2 bg-slate-900 text-white text-xs font-medium rounded-lg hover:bg-slate-800 transition-colors">Details</button>
                     </div>
                   </div>
                 ))}
@@ -168,21 +168,21 @@ export const Dashboard: React.FC = () => {
             )}
           </ViewportAware>
 
-          <ViewportAware placeholderHeight="400px" className="bg-white/85 backdrop-blur-xl p-8 rounded-[2.5rem] border border-slate-200/70 shadow-lg shadow-indigo-50">
-            <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-8">Warehouse Inventory Status</h4>
-            <div className="space-y-6">
+          <ViewportAware placeholderHeight="400px" className="bg-white p-6 rounded-xl border border-slate-200 shadow-soft">
+            <h4 className="text-sm font-semibold text-slate-900 mb-6">Warehouse Inventory Status</h4>
+            <div className="space-y-5">
               {myFabrics.map(f => (
-                <div key={f.id} className="space-y-3">
+                <div key={f.id} className="space-y-2">
                   <div className="flex justify-between items-end">
                     <div>
-                      <span className="text-xs font-black text-slate-800">{f.name}</span>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{f.color}</p>
+                      <span className="text-sm font-medium text-slate-900">{f.name}</span>
+                      <p className="text-xs text-slate-500">{f.color}</p>
                     </div>
-                    <span className="text-sm font-black text-indigo-600">{f.stock}m</span>
+                    <span className="text-sm font-semibold text-slate-900">{f.stock}m</span>
                   </div>
-                  <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                     <div 
-                      className={`h-full rounded-full transition-all duration-1000 ${f.stock < 50 ? 'bg-rose-500' : 'bg-indigo-600'}`}
+                      className={`h-full rounded-full transition-all duration-1000 ${f.stock < 50 ? 'bg-red-500' : 'bg-slate-900'}`}
                       style={{ width: `${Math.min(100, (f.stock / 200) * 100)}%` }}
                     ></div>
                   </div>
