@@ -11,10 +11,17 @@ from passlib.context import CryptContext
 from pydantic import BaseModel
 import secrets
 import logging
+import os
 from functools import wraps
 
 # Security Configuration
-SECRET_KEY = secrets.token_urlsafe(32)  # Generate secure random key
+# IMPORTANT: Set SECRET_KEY via environment variable in production!
+# Generate a secure key: python -c "import secrets; print(secrets.token_urlsafe(32))"
+SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_urlsafe(32))
+if os.getenv("ENVIRONMENT") == "production" and not os.getenv("SECRET_KEY"):
+    logger.error("SECRET_KEY environment variable not set in production!")
+    raise ValueError("SECRET_KEY must be set via environment variable in production")
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 7

@@ -635,3 +635,121 @@ Jika menemukan vulnerability, segera laporkan ke:
 **Maintained By:** Development Team
 
 **Status Keamanan:** ✅ Production Ready dengan implementasi best practices industry-standard
+
+---
+
+## 🚀 Production Improvements
+
+### Current Implementation vs Production Best Practices
+
+| Feature | Current (Demo) | Production Recommended |
+|---------|----------------|------------------------|
+| Secret Key | Generated at runtime | Environment variable (persistent) |
+| Token Storage | localStorage | httpOnly cookies (refresh token) + sessionStorage (access token) |
+| Navigation | window.location | React Router useNavigate |
+| Database | In-memory | PostgreSQL/MySQL with encryption |
+| HTTPS | Optional | Mandatory with HSTS |
+| Rate Limiting | Per IP | Per IP + Per User |
+| Session Management | JWT only | JWT + Redis for invalidation |
+| Monitoring | File logs | Centralized logging (ELK/Splunk) |
+
+### Recommended Production Enhancements
+
+#### 1. Secret Key Management
+```python
+# backend/security.py
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY environment variable must be set")
+```
+
+#### 2. HTTP-Only Cookies for Tokens
+```python
+# Set refresh token as httpOnly cookie
+response.set_cookie(
+    key="refresh_token",
+    value=refresh_token,
+    httponly=True,
+    secure=True,  # HTTPS only
+    samesite="strict",
+    max_age=7*24*60*60  # 7 days
+)
+```
+
+```typescript
+// Frontend: Remove refresh token from localStorage
+// Access token can stay in memory or sessionStorage
+```
+
+#### 3. Token Blacklist for Logout
+```python
+# Use Redis to store blacklisted tokens
+from redis import Redis
+redis_client = Redis(host='localhost', port=6379)
+
+def blacklist_token(token: str, ttl: int):
+    redis_client.setex(f"blacklist:{token}", ttl, "1")
+
+def is_token_blacklisted(token: str) -> bool:
+    return redis_client.exists(f"blacklist:{token}")
+```
+
+#### 4. Database Encryption
+```python
+# Encrypt sensitive data at rest
+from cryptography.fernet import Fernet
+
+cipher = Fernet(ENCRYPTION_KEY)
+encrypted_data = cipher.encrypt(data.encode())
+```
+
+#### 5. Enhanced Monitoring
+```python
+# Use structured logging with correlation IDs
+import structlog
+
+logger = structlog.get_logger()
+logger.info("user_login", user_id=user.id, ip=request.client.host, correlation_id=correlation_id)
+```
+
+#### 6. Advanced Rate Limiting
+```python
+# Rate limit per user + per IP
+from slowapi import Limiter
+
+@limiter.limit("5/minute", key_func=lambda request: request.headers.get("Authorization"))
+@limiter.limit("10/minute", key_func=get_remote_address)
+async def login():
+    ...
+```
+
+#### 7. CSRF Protection for Cookies
+```python
+from starlette.middleware.csrf import CSRFMiddleware
+
+app.add_middleware(CSRFMiddleware, secret="your-csrf-secret")
+```
+
+#### 8. Security Scanning
+```bash
+# Regular security audits
+bandit -r backend/  # Python security linter
+safety check  # Check dependencies for vulnerabilities
+npm audit  # Check npm packages
+```
+
+---
+
+## 🔍 Known Limitations (Demo)
+
+1. **In-Memory Database**: Data lost on restart. Use PostgreSQL/MySQL in production.
+2. **localStorage Tokens**: Vulnerable to XSS. Use httpOnly cookies for refresh tokens.
+3. **No Token Revocation**: Implement Redis blacklist for logout/ban functionality.
+4. **No Session Management**: Add session tracking for concurrent login detection.
+5. **Basic Rate Limiting**: Enhance with per-user limits and DDoS protection.
+6. **File-based Logging**: Use centralized logging for better monitoring.
+7. **No MFA**: Consider adding 2FA/MFA for admin accounts.
+8. **No Password Reset**: Implement secure password reset with email verification.
+
+---
+

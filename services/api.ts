@@ -10,6 +10,10 @@ const disableProxy = import.meta.env.VITE_DISABLE_PROXY === 'true';
 const BASE_URL = (isDevelopment && !disableProxy) ? '' : API_BASE_URL;
 
 // Token storage keys
+// NOTE: Using localStorage for demo purposes. In production:
+// - Use httpOnly cookies for refresh tokens (more secure against XSS)
+// - Keep access token in memory or sessionStorage
+// - Implement CSRF protection with cookies
 const ACCESS_TOKEN_KEY = 'sc_access_token';
 const REFRESH_TOKEN_KEY = 'sc_refresh_token';
 
@@ -35,6 +39,8 @@ class TokenManager {
 
   static isTokenExpired(token: string): boolean {
     try {
+      // Client-side expiration check (structure validation only)
+      // NOTE: This does NOT verify the signature - server always validates
       const payload = JSON.parse(atob(token.split('.')[1]));
       const exp = payload.exp * 1000; // Convert to milliseconds
       return Date.now() >= exp;
@@ -79,6 +85,9 @@ async function fetchApi(endpoint: string, options?: RequestInit, skipAuth = fals
       accessToken = TokenManager.getAccessToken();
     } else {
       TokenManager.clearTokens();
+      // NOTE: Using window.location for demo. In production with React Router:
+      // - Pass navigate function from useNavigate hook
+      // - Or dispatch a logout action that components can handle
       window.location.href = '/';
       throw new Error('Session expired. Please login again.');
     }
