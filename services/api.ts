@@ -111,6 +111,11 @@ async function fetchApi(endpoint: string, options?: RequestInit, skipAuth = fals
       if (refreshed) {
         // Retry the original request with new token
         const newAccessToken = TokenManager.getAccessToken();
+        if (!newAccessToken) {
+          TokenManager.clearTokens();
+          window.location.href = '/';
+          throw new Error('Failed to get access token after refresh');
+        }
         const retryHeaders = {
           ...headers,
           'Authorization': `Bearer ${newAccessToken}`,

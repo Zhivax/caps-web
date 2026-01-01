@@ -74,9 +74,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           ApiService.getFabrics(),
           ApiService.getRequests(),
           ApiService.getHijabProducts(),
-          ApiService.getSales().catch(() => []), // May fail for suppliers
-          ApiService.getUsageHistory().catch(() => []), // May fail for suppliers
-          ApiService.getUmkmFabrics().catch(() => []) // May fail for suppliers
+          ApiService.getSales().catch((err) => { console.warn('Failed to fetch sales:', err); return []; }), // May fail for suppliers
+          ApiService.getUsageHistory().catch((err) => { console.warn('Failed to fetch usage history:', err); return []; }), // May fail for suppliers
+          ApiService.getUmkmFabrics().catch((err) => { console.warn('Failed to fetch UMKM fabrics:', err); return []; }) // May fail for suppliers
         ]);
         setFabrics(f);
         setRequests(r);

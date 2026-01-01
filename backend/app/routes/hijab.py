@@ -1,7 +1,7 @@
 """
 Hijab product and sales management routes
 """
-from typing import List
+from typing import List, Set
 from fastapi import APIRouter, HTTPException, Depends, status
 from datetime import datetime
 from app.models import HijabProduct, HijabSale, HijabSaleRequest, UsageLog
@@ -10,6 +10,11 @@ from app.database import HIJAB_PRODUCTS, SALES, USAGE_HISTORY
 import uuid
 
 router = APIRouter(prefix="/api", tags=["hijab"])
+
+
+def get_user_product_ids(user_id: str) -> Set[str]:
+    """Helper function to get product IDs owned by a user"""
+    return {p.id for p in HIJAB_PRODUCTS if p.umkmId == user_id}
 
 @router.get("/hijab-products", response_model=List[HijabProduct])
 async def get_hijab_products(current_user: TokenData = Depends(get_current_active_user)):
@@ -71,7 +76,7 @@ async def get_sales(current_user: TokenData = Depends(get_current_active_user)):
         )
     
     # Get products owned by current user
-    user_product_ids = {p.id for p in HIJAB_PRODUCTS if p.umkmId == current_user.user_id}
+    user_product_ids = get_user_product_ids(current_user.user_id)
     
     # Return only sales for current user's products
     return [sale for sale in SALES if sale.productId in user_product_ids]
@@ -139,7 +144,7 @@ async def get_usage_history(current_user: TokenData = Depends(get_current_active
         )
     
     # Get products owned by current user
-    user_product_ids = {p.id for p in HIJAB_PRODUCTS if p.umkmId == current_user.user_id}
+    user_product_ids = get_user_product_ids(current_user.user_id)
     
     # Return only usage logs for current user's products
     return [log for log in USAGE_HISTORY if log.productId in user_product_ids]

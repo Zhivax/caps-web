@@ -3,6 +3,7 @@ import React, { useState, useEffect, Suspense, lazy, useTransition } from 'react
 import { AppProvider, useApp } from './context/AppContext';
 import { Login } from './pages/Login';
 import { Layout } from './components/Layout';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Lazy loading rute utama
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
@@ -65,9 +66,11 @@ const Main: React.FC = () => {
 };
 
 const App: React.FC = () => (
-  <AppProvider>
-    <Main />
-  </AppProvider>
+  <ErrorBoundary>
+    <AppProvider>
+      <Main />
+    </AppProvider>
+  </ErrorBoundary>
 );
 
 export default App;
