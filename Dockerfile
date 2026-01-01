@@ -1,5 +1,5 @@
-# Build stage
-FROM node:20-alpine AS builder
+# Build stage - using full node image instead of alpine to avoid npm bugs
+FROM node:20 AS builder
 
 WORKDIR /app
 
@@ -7,15 +7,15 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm install
 
 # Copy source code
 COPY . .
 
-# Build the application
+# Build the application  
 RUN npm run build
 
-# Production stage
+# Production stage - use nginx alpine for smaller final image
 FROM nginx:alpine
 
 # Copy custom nginx config
