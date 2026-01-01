@@ -1,81 +1,105 @@
 
 import { Fabric, HijabProduct, FabricRequest, HijabSale, User, UserRole, RequestStatus, UsageLog } from '../types';
-import { USERS, INITIAL_FABRICS, INITIAL_HIJAB_STOCK, INITIAL_REQUESTS } from '../data/mockData';
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+// API base URL - change this to your backend URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+async function fetchApi(endpoint: string, options?: RequestInit) {
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  });
+  
+  if (!response.ok) {
+    throw new Error(`API Error: ${response.statusText}`);
+  }
+  
+  return response.json();
+}
 
 export const ApiService = {
   async login(email: string): Promise<User | null> {
-    await delay(800);
-    const found = USERS.find(u => u.email.toLowerCase() === email.toLowerCase());
-    return found || null;
+    try {
+      const user = await fetchApi('/api/login', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      });
+      return user;
+    } catch (error) {
+      console.error('Login error:', error);
+      return null;
+    }
   },
 
   async getFabrics(): Promise<Fabric[]> {
-    await delay(500);
-    const saved = localStorage.getItem('sc_fabrics');
-    return saved ? JSON.parse(saved) : INITIAL_FABRICS;
+    return fetchApi('/api/fabrics');
+  },
+
+  async addFabric(fabric: Fabric): Promise<void> {
+    await fetchApi('/api/fabrics', {
+      method: 'POST',
+      body: JSON.stringify(fabric),
+    });
   },
 
   async updateFabric(fabricId: string, updates: Partial<Fabric>): Promise<void> {
-    await delay(400);
-    const fabrics = await this.getFabrics();
-    const updated = fabrics.map(f => f.id === fabricId ? { ...f, ...updates } : f);
-    localStorage.setItem('sc_fabrics', JSON.stringify(updated));
+    await fetchApi(`/api/fabrics/${fabricId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(updates),
+    });
   },
 
   async getRequests(): Promise<FabricRequest[]> {
-    await delay(600);
-    const saved = localStorage.getItem('sc_requests');
-    return saved ? JSON.parse(saved) : INITIAL_REQUESTS;
+    return fetchApi('/api/requests');
   },
 
   async saveRequest(request: FabricRequest): Promise<void> {
-    await delay(700);
-    const requests = await this.getRequests();
-    localStorage.setItem('sc_requests', JSON.stringify([request, ...requests]));
+    await fetchApi('/api/requests', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
   },
 
   async updateRequestStatus(id: string, status: RequestStatus): Promise<void> {
-    await delay(500);
-    const requests = await this.getRequests();
-    const updated = requests.map(r => r.id === id ? { ...r, status } : r);
-    localStorage.setItem('sc_requests', JSON.stringify(updated));
+    await fetchApi(`/api/requests/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
   },
 
   async getHijabProducts(): Promise<HijabProduct[]> {
-    await delay(500);
-    const saved = localStorage.getItem('sc_hijab');
-    return saved ? JSON.parse(saved) : INITIAL_HIJAB_STOCK;
+    return fetchApi('/api/hijab-products');
   },
 
   async updateHijabProduct(product: HijabProduct): Promise<void> {
-    await delay(400);
-    const products = await this.getHijabProducts();
-    const updated = products.map(p => p.id === product.id ? product : p);
-    localStorage.setItem('sc_hijab', JSON.stringify(updated));
+    await fetchApi('/api/hijab-products', {
+      method: 'POST',
+      body: JSON.stringify(product),
+    });
   },
 
   async getSales(): Promise<HijabSale[]> {
-    await delay(500);
-    const saved = localStorage.getItem('sc_hijab_sales');
-    return saved ? JSON.parse(saved) : [];
+    return fetchApi('/api/sales');
   },
 
   async recordSale(sale: HijabSale): Promise<void> {
-    await delay(600);
-    const sales = await this.getSales();
-    localStorage.setItem('sc_hijab_sales', JSON.stringify([sale, ...sales]));
+    await fetchApi('/api/sales', {
+      method: 'POST',
+      body: JSON.stringify(sale),
+    });
   },
 
   async getUsageHistory(): Promise<UsageLog[]> {
-    await delay(500);
-    const saved = localStorage.getItem('sc_usage_history');
-    return saved ? JSON.parse(saved) : [];
+    return fetchApi('/api/usage-history');
   },
 
   async recordUsage(log: UsageLog): Promise<void> {
-    const history = await this.getUsageHistory();
-    localStorage.setItem('sc_usage_history', JSON.stringify([log, ...history]));
+    await fetchApi('/api/usage-history', {
+      method: 'POST',
+      body: JSON.stringify(log),
+    });
   }
 };

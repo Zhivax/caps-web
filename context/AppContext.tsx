@@ -246,10 +246,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const addFabric = useCallback(async (fabricData: Omit<Fabric, 'id' | 'supplierId' | 'supplierName'>) => {
     const newFabric = { ...fabricData, id: `f-${Date.now()}`, supplierId: user!.id, supplierName: user!.name };
-    const currentFabrics = await ApiService.getFabrics();
-    const updatedFabrics = [...currentFabrics, newFabric];
-    localStorage.setItem('sc_fabrics', JSON.stringify(updatedFabrics));
-    setFabrics(updatedFabrics);
+    await ApiService.addFabric(newFabric);
+    setFabrics(prev => [...prev, newFabric]);
   }, [user]);
 
   const markNotificationsAsRead = useCallback(() => {
