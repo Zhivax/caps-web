@@ -247,12 +247,184 @@ gcloud builds submit --config cloudbuild.yaml --no-source
    - Check variable names match .env.example
    - Ensure no typos in variable names
 
+## Migrated Deployment References
+
+The following sections consolidate the deployment notes that previously lived in other markdown files.
+
+### Run Locally (for verification)
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Prepare environment variables:
+   ```bash
+   cp .env.example .env.local
+   # Add GEMINI_API_KEY to .env.local
+   ```
+3. Start the app:
+   ```bash
+   npm run dev
+   ```
+
+### Deployment Quick Steps (App Engine)
+1. Initialize and authenticate:
+   ```bash
+   gcloud init
+   gcloud auth login
+   ```
+2. Set the project:
+   ```bash
+   gcloud config set project YOUR_PROJECT_ID
+   ```
+3. Build and deploy:
+   ```bash
+   npm install
+   npm run build
+   gcloud app deploy
+   ```
+4. Optional environment variables:
+   ```bash
+   gcloud app deploy --set-env-vars GEMINI_API_KEY=your-api-key-here
+   ```
+5. Open the app:
+   ```bash
+   gcloud app browse
+   ```
+
+### Deployment Quick Steps (Cloud Run)
+1. Prepare variables and enable APIs:
+   ```bash
+   export PROJECT_ID=your-project-id
+   export REGION=asia-southeast2
+   export SERVICE_NAME=caps-web
+   gcloud services enable run.googleapis.com
+   gcloud services enable cloudbuild.googleapis.com
+   ```
+2. Build and push the image:
+   ```bash
+   gcloud builds submit --tag gcr.io/$PROJECT_ID/$SERVICE_NAME
+   ```
+3. Deploy:
+   ```bash
+   gcloud run deploy $SERVICE_NAME \
+     --image gcr.io/$PROJECT_ID/$SERVICE_NAME \
+     --platform managed \
+     --region $REGION \
+     --allow-unauthenticated \
+     --port 8080
+   ```
+4. Optional environment variables:
+   ```bash
+   gcloud run services update $SERVICE_NAME \
+     --set-env-vars GEMINI_API_KEY=your-api-key-here \
+     --region $REGION
+   ```
+
+### Deployment Quick Steps (Cloud Build)
+1. Enable Cloud Build API:
+   ```bash
+   gcloud services enable cloudbuild.googleapis.com
+   ```
+2. Submit build:
+   ```bash
+   gcloud builds submit --config cloudbuild.yaml
+   ```
+3. Connect GitHub via Cloud Build Triggers if desired.
+
+### Pre-Deployment Checklist
+- [ ] Google Cloud CLI (gcloud) installed
+- [ ] Google Cloud project created
+- [ ] Billing enabled on the project
+- [ ] Authenticated with `gcloud auth login`
+- [ ] Project set with `gcloud config set project PROJECT_ID`
+- [ ] `.env.example` reviewed
+- [ ] Environment variables documented
+- [ ] API keys obtained (if needed)
+- [ ] Secrets management strategy decided
+- [ ] Dependencies installed (`npm install`)
+- [ ] Application builds successfully (`npm run build`)
+- [ ] Build output exists in `dist/` directory
+- [ ] Preview server works (`npm run preview`)
+- [ ] No console errors in browser
+- [ ] `app.yaml` reviewed
+- [ ] `Dockerfile` reviewed
+- [ ] `nginx.conf` reviewed
+- [ ] `cloudbuild.yaml` reviewed
+- [ ] `.gcloudignore` reviewed
+- [ ] `.dockerignore` reviewed
+- [ ] `package-lock.json` present
+- [ ] No secrets in source code
+- [ ] `.env.local` is in `.gitignore`
+- [ ] HTTPS enforcement configured
+- [ ] Security headers configured in nginx.conf
+- [ ] Dependencies audited (`npm audit`)
+- [ ] First App Engine deploy tested (`npm run build` then `gcloud app deploy`)
+- [ ] App Engine environment variables set if needed
+- [ ] Cloud Run image built and deployed (if using Cloud Run)
+- [ ] Cloud Run environment variables set if needed
+- [ ] Post-deployment sanity checks complete (accessibility, pages load, assets resolve, console clean)
+- [ ] Monitoring and budget alerts configured
+- [ ] Optional CI/CD triggers configured
+- [ ] Pricing reviewed and auto-scaling settings confirmed
+- [ ] Documentation reviewed and team trained
+
+### Quick Deployment Commands Reference
+**App Engine**
+```bash
+npm run build
+gcloud app deploy
+gcloud app deploy --set-env-vars KEY=value
+gcloud app logs tail
+gcloud app browse
+```
+
+**Cloud Run**
+```bash
+gcloud builds submit --tag gcr.io/PROJECT_ID/SERVICE_NAME
+gcloud run deploy SERVICE_NAME \
+  --image gcr.io/PROJECT_ID/SERVICE_NAME \
+  --platform managed \
+  --region REGION \
+  --allow-unauthenticated
+
+gcloud run services update SERVICE_NAME \
+  --set-env-vars KEY=value \
+  --region REGION
+```
+
+**deploy.sh helper**
+```bash
+./deploy.sh app-engine
+./deploy.sh cloud-run SERVICE_NAME REGION
+```
+
+### Troubleshooting Quick Fixes
+**Build issues**
+```bash
+rm -rf node_modules package-lock.json
+npm install
+npm run build
+```
+
+**Deployment issues**
+```bash
+gcloud auth login
+gcloud config set project PROJECT_ID
+gcloud app deploy --verbosity=debug
+```
+
+**Log checking**
+```bash
+gcloud app logs tail -s default
+gcloud run services logs read SERVICE_NAME --region REGION --limit 50
+```
+
 ## Next Steps
 
 1. ✅ All deployment configurations are in place
 2. 📝 Set up your Google Cloud project
 3. 🔑 Obtain Gemini API key (if needed)
-4. 🚀 Choose deployment method and follow README
+4. 🚀 Choose deployment method and follow this DEPLOYMENT guide
 5. 📊 Set up monitoring and alerts
 6. 💰 Configure budget alerts
 
