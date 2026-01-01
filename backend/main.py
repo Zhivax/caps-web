@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional, Dict
 from datetime import datetime, timedelta
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -13,7 +13,7 @@ import logging
 
 from security import (
     JWTHandler, PasswordHash, AuthMiddleware, RBACHandler,
-    Token, TokenData, InputSanitizer, AuditLogger
+    Token, TokenData, InputSanitizer, AuditLogger, get_current_active_user
 )
 
 # Logging configuration
@@ -83,7 +83,8 @@ class UserBase(BaseModel):
     location: Optional[str] = Field(None, max_length=200)
     description: Optional[str] = Field(None, max_length=500)
     
-    @validator('email')
+    @field_validator('email')
+    @classmethod
     def validate_email(cls, v):
         if not InputSanitizer.validate_email(v):
             raise ValueError('Invalid email format')
@@ -116,7 +117,8 @@ class LoginRequest(BaseModel):
     email: str = Field(..., min_length=5, max_length=100)
     password: str = Field(..., min_length=6, max_length=100)
     
-    @validator('email')
+    @field_validator('email')
+    @classmethod
     def validate_email(cls, v):
         if not InputSanitizer.validate_email(v):
             raise ValueError('Invalid email format')
@@ -473,7 +475,7 @@ async def refresh_token(request: Request, refresh_data: RefreshTokenRequest):
 
 
 @app.get("/api/auth/me", response_model=UserResponse)
-async def get_current_user_info(current_user: TokenData = Depends(AuthMiddleware.get_current_active_user)):
+async def get_current_user_info(current_user: TokenData = Depends(get_current_active_user)):
     """Get current authenticated user information"""
     user = next((u for u in USERS if u.id == current_user.user_id), None)
     if not user:
@@ -492,14 +494,14 @@ async def get_current_user_info(current_user: TokenData = Depends(AuthMiddleware
 
 
 @app.get("/api/fabrics", response_model=List[Fabric])
-async def get_fabrics(current_user: TokenData = Depends(AuthMiddleware.get_current_active_user)):
+async def get_fabrics(current_user: TokenData = Depends(get_current_active_user)):
     """Get all fabrics from all suppliers (authenticated users only)"""
     return FABRICS
 
 @app.post("/api/fabrics")
 async def add_fabric(
     fabric: Fabric, 
-    current_user: TokenData = Depends(AuthMiddleware.get_current_active_user)
+    current_user: TokenData = Depends(get_current_active_user)
 ):
     """Add a new fabric to the catalog (SUPPLIER role only)"""
     if current_user.role != "SUPPLIER":
@@ -528,7 +530,7 @@ async def add_fabric(
 @app.get("/api/fabrics/{fabric_id}", response_model=Fabric)
 async def get_fabric(
     fabric_id: str,
-    current_user: TokenData = Depends(AuthMiddleware.get_current_active_user)
+    current_user: TokenData = Depends(get_current_active_user)
 ):
     """Get a specific fabric by ID (authenticated users only)"""
     fabric = next((f for f in FABRICS if f.id == fabric_id), None)
@@ -540,7 +542,7 @@ async def get_fabric(
 async def update_fabric(
     fabric_id: str, 
     update: FabricUpdate,
-    current_user: TokenData = Depends(AuthMiddleware.get_current_active_user)
+    current_user: TokenData = Depends(get_current_active_user)
 ):
     """Update fabric stock or price (SUPPLIER role only, own fabrics only)"""
     if current_user.role != "SUPPLIER":
@@ -571,7 +573,7 @@ async def update_fabric(
 
 
 @app.get("/api/requests", response_model=List[FabricRequest])
-async def get_requests(current_user: TokenData = Depends(AuthMiddleware.get_current_active_user)):
+async def get_requests(current_user: TokenData = Depends(get_current_active_user)):
     """Get all fabric requests (filtered by user role)"""
     if current_user.role == "UMKM":
         # UMKM users see only their own requests
@@ -584,7 +586,7 @@ async def get_requests(current_user: TokenData = Depends(AuthMiddleware.get_curr
 @app.post("/api/requests")
 async def create_request(
     request: FabricRequest,
-    current_user: TokenData = Depends(AuthMiddleware.get_current_active_user)
+    current_user: TokenData = Depends(get_current_active_user)
 ):
     """Create a new fabric request (UMKM role only)"""
     if current_user.role != "UMKM":
@@ -617,7 +619,7 @@ async def create_request(
 async def update_request_status(
     request_id: str, 
     update: RequestStatusUpdate,
-    current_user: TokenData = Depends(AuthMiddleware.get_current_active_user)
+    current_user: TokenData = Depends(get_current_active_user)
 ):
     """Update request status (role-based permissions)"""
     request = next((r for r in REQUESTS if r.id == request_id), None)
@@ -664,7 +666,7 @@ async def update_request_status(
 
 
 @app.get("/api/hijab-products", response_model=List[HijabProduct])
-async def get_hijab_products(current_user: TokenData = Depends(AuthMiddleware.get_current_active_user)):
+async def get_hijab_products(current_user: TokenData = Depends(get_current_active_user)):
     """Get hijab products (UMKM sees own, SUPPLIER sees all)"""
     if current_user.role == "UMKM":
         return [p for p in HIJAB_PRODUCTS if p.umkmId == current_user.user_id]
@@ -673,7 +675,7 @@ async def get_hijab_products(current_user: TokenData = Depends(AuthMiddleware.ge
 @app.post("/api/hijab-products")
 async def create_or_update_hijab_product(
     product: HijabProduct,
-    current_user: TokenData = Depends(AuthMiddleware.get_current_active_user)
+    current_user: TokenData = Depends(get_current_active_user)
 ):
     """Create or update hijab product (UMKM role only)"""
     if current_user.role != "UMKM":
@@ -705,7 +707,7 @@ async def create_or_update_hijab_product(
         return {"message": "Product created successfully", "product": product}
 
 @app.get("/api/sales", response_model=List[HijabSale])
-async def get_sales(current_user: TokenData = Depends(AuthMiddleware.get_current_active_user)):
+async def get_sales(current_user: TokenData = Depends(get_current_active_user)):
     """Get hijab sales (UMKM role only)"""
     if current_user.role != "UMKM":
         raise HTTPException(
@@ -717,7 +719,7 @@ async def get_sales(current_user: TokenData = Depends(AuthMiddleware.get_current
 @app.post("/api/sales")
 async def record_sale(
     sale: HijabSale,
-    current_user: TokenData = Depends(AuthMiddleware.get_current_active_user)
+    current_user: TokenData = Depends(get_current_active_user)
 ):
     """Record a new hijab sale (UMKM role only)"""
     if current_user.role != "UMKM":
@@ -736,7 +738,7 @@ async def record_sale(
     return {"message": "Sale recorded successfully", "sale": sale}
 
 @app.get("/api/usage-history", response_model=List[UsageLog])
-async def get_usage_history(current_user: TokenData = Depends(AuthMiddleware.get_current_active_user)):
+async def get_usage_history(current_user: TokenData = Depends(get_current_active_user)):
     """Get fabric usage history (UMKM role only)"""
     if current_user.role != "UMKM":
         raise HTTPException(
@@ -748,7 +750,7 @@ async def get_usage_history(current_user: TokenData = Depends(AuthMiddleware.get
 @app.post("/api/usage-history")
 async def record_usage(
     log: UsageLog,
-    current_user: TokenData = Depends(AuthMiddleware.get_current_active_user)
+    current_user: TokenData = Depends(get_current_active_user)
 ):
     """Record fabric usage (UMKM role only)"""
     if current_user.role != "UMKM":

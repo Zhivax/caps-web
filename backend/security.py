@@ -127,11 +127,11 @@ class AuthMiddleware:
         """Validate token and return current user data"""
         token = credentials.credentials
         return JWTHandler.decode_token(token)
-    
-    @staticmethod
-    async def get_current_active_user(current_user: TokenData = Depends(get_current_user)) -> TokenData:
-        """Get current active user (can be extended with user status checks)"""
-        return current_user
+
+
+async def get_current_active_user(current_user: TokenData = Depends(AuthMiddleware.get_current_user)) -> TokenData:
+    """Get current active user (can be extended with user status checks)"""
+    return current_user
 
 
 class RBACHandler:
