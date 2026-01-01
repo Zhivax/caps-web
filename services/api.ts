@@ -72,6 +72,12 @@ class InputSanitizer {
   // Regex-based HTML sanitization is NOT secure against all XSS vectors
 }
 
+// Centralized logout handler to ensure consistency
+function handleSessionExpired(): void {
+  TokenManager.clearTokens();
+  window.location.href = '/';
+}
+
 // Secure fetch with automatic token handling
 async function fetchApi(endpoint: string, options?: RequestInit, skipAuth = false): Promise<any> {
   let accessToken = TokenManager.getAccessToken();
@@ -82,8 +88,7 @@ async function fetchApi(endpoint: string, options?: RequestInit, skipAuth = fals
     if (refreshed) {
       accessToken = TokenManager.getAccessToken();
     } else {
-      TokenManager.clearTokens();
-      window.location.href = '/';
+      handleSessionExpired();
       throw new Error('Session expired. Please login again.');
     }
   }
@@ -112,8 +117,7 @@ async function fetchApi(endpoint: string, options?: RequestInit, skipAuth = fals
         // Retry the original request with new token
         const newAccessToken = TokenManager.getAccessToken();
         if (!newAccessToken) {
-          TokenManager.clearTokens();
-          window.location.href = '/';
+          handleSessionExpired();
           throw new Error('Failed to get access token after refresh');
         }
         const retryHeaders = {
@@ -133,8 +137,7 @@ async function fetchApi(endpoint: string, options?: RequestInit, skipAuth = fals
         
         return retryResponse.json();
       } else {
-        TokenManager.clearTokens();
-        window.location.href = '/';
+        handleSessionExpired();
         throw new Error('Session expired. Please login again.');
       }
     }
