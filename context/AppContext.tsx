@@ -29,11 +29,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('sc_user');
-    return saved ? JSON.parse(saved) : null;
-  });
-  
+  const [user, setUser] = useState<User | null>(null);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
   const [requests, setRequests] = useState<FabricRequest[]>([]);
   const [hijabProducts, setHijabProducts] = useState<HijabProduct[]>([]);
@@ -43,9 +39,57 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [usageHistory, setUsageHistory] = useState<UsageLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Helper function to clear invalid session
+  const clearInvalidSession = useCallback(() => {
+    setUser(null);
+    ApiService.logout();
+    try {
+      localStorage.removeItem('sc_user');
+    } catch (e) {
+      console.error("Failed to clear localStorage:", e);
+    }
+  }, []);
+
+  // Validate session on mount
+  useEffect(() => {
+    const validateSession = async () => {
+      setIsLoading(true);
+      try {
+        // Check if we have a saved user and token
+        const savedUser = localStorage.getItem('sc_user');
+        const hasToken = ApiService.hasValidToken();
+        
+        if (savedUser && hasToken) {
+          // Verify token is still valid with backend
+          const currentUser = await ApiService.getCurrentUser();
+          if (currentUser) {
+            // Use fresh user data from backend
+            setUser(currentUser);
+          } else {
+            // Token invalid, clear session
+            clearInvalidSession();
+          }
+        } else {
+          // No saved session or invalid token
+          clearInvalidSession();
+        }
+      } catch (err) {
+        console.error("Session validation failed:", err);
+        // Clear invalid session
+        clearInvalidSession();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    validateSession();
+  }, [clearInvalidSession]);
+
+  // Load data when user is authenticated
   useEffect(() => {
     const initData = async () => {
-      setIsLoading(true);
+      if (!user) return;
+      
       try {
         const [f, r, h, s, uh, uf] = await Promise.all([
           ApiService.getFabrics(),
@@ -66,18 +110,29 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         if (savedNotifs) setNotifications(JSON.parse(savedNotifs));
       } catch (err) {
         console.error("Failed to fetch data:", err);
-      } finally {
-        setIsLoading(false);
+        // If data fetch fails with auth error, logout
+        if (ApiService.isAuthError(err)) {
+          clearInvalidSession();
+        }
       }
     };
+    
     initData();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    localStorage.setItem('sc_user', JSON.stringify(user));
-    localStorage.setItem('sc_umkm_fabrics', JSON.stringify(umkmFabrics));
-    localStorage.setItem('sc_notifications', JSON.stringify(notifications));
-    localStorage.setItem('sc_usage_history', JSON.stringify(usageHistory));
+    try {
+      if (user) {
+        localStorage.setItem('sc_user', JSON.stringify(user));
+      } else {
+        localStorage.removeItem('sc_user');
+      }
+      localStorage.setItem('sc_umkm_fabrics', JSON.stringify(umkmFabrics));
+      localStorage.setItem('sc_notifications', JSON.stringify(notifications));
+      localStorage.setItem('sc_usage_history', JSON.stringify(usageHistory));
+    } catch (e) {
+      console.error("Failed to save to localStorage:", e);
+    }
   }, [user, umkmFabrics, notifications, usageHistory]);
 
   const addNotification = useCallback((userId: string, title: string, message: string, type: AppNotification['type']) => {
@@ -105,10 +160,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, []);
 
   const logout = useCallback(() => {
-    setUser(null);
-    ApiService.logout();
-    localStorage.removeItem('sc_user');
-  }, []);
+    clearInvalidSession();
+  }, [clearInvalidSession]);
 
   const recordSale = useCallback(async (saleData: Omit<HijabSale, 'id' | 'timestamp'>) => {
     try {

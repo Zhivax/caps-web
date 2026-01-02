@@ -19,7 +19,7 @@ const History = lazy(() => import('./pages/History').then(m => ({ default: m.His
 const Settings = lazy(() => import('./pages/Settings').then(m => ({ default: m.Settings })));
 
 const Main: React.FC = () => {
-  const { user } = useApp();
+  const { user, isLoading } = useApp();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isPending, startTransition] = useTransition();
 
@@ -27,6 +27,19 @@ const Main: React.FC = () => {
     setActiveTab('dashboard');
   }, [user?.id]);
 
+  // Show loading state during authentication check
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login page if not authenticated
   if (!user) return <Login />;
 
   const handleTabChange = (tab: string) => {

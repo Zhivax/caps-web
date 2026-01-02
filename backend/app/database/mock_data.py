@@ -8,11 +8,12 @@ from app.models import (
     User, Fabric, HijabProduct, HijabSale, 
     FabricRequest, UsageLog, UMKMFabric
 )
-from app.core.security import PasswordHash
 
 
 # Default password for all demo users: "password123"
-HASHED_PASSWORD = PasswordHash.hash_password("password123")
+# Using a pre-computed hash to ensure consistency across app restarts
+# Generated with: PasswordHash.hash_password("password123")
+HASHED_PASSWORD = "$2b$12$hhNT/r20c8CSgQ.aLC0ND.WnFozO1kp81pvEk6iiHvpJXtgluPpFW"
 
 
 def get_users() -> List[User]:

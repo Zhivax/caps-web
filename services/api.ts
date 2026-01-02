@@ -17,11 +17,29 @@ const BASE_URL = (isDevelopment && !disableProxy) ? '' : API_BASE_URL;
 const ACCESS_TOKEN_KEY = 'sc_access_token';
 const REFRESH_TOKEN_KEY = 'sc_refresh_token';
 
+// Custom API Error class
+class ApiError extends Error {
+  constructor(message: string, public statusCode?: number, public details?: any) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+// Check if error is an authentication error
+function isAuthError(error: any): boolean {
+  return error instanceof ApiError && (error.statusCode === 401 || error.statusCode === 403);
+}
+
 // Token management
 class TokenManager {
+  private static tokenExpiryCache: { token: string; isExpired: boolean; checkedAt: number } | null = null;
+  private static readonly CACHE_TTL = 5000; // Cache for 5 seconds
+
   static setTokens(accessToken: string, refreshToken: string): void {
     localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
     localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    // Clear cache when new tokens are set
+    this.tokenExpiryCache = null;
   }
 
   static getAccessToken(): string | null {
@@ -35,18 +53,41 @@ class TokenManager {
   static clearTokens(): void {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
+    this.tokenExpiryCache = null;
   }
 
   static isTokenExpired(token: string): boolean {
+    // Check cache first
+    const now = Date.now();
+    if (
+      this.tokenExpiryCache && 
+      this.tokenExpiryCache.token === token &&
+      now - this.tokenExpiryCache.checkedAt < this.CACHE_TTL
+    ) {
+      return this.tokenExpiryCache.isExpired;
+    }
+
+    // Compute expiry
     try {
       // Client-side expiration check (structure validation only)
       // NOTE: This does NOT verify the signature - server always validates
       const payload = JSON.parse(atob(token.split('.')[1]));
       const exp = payload.exp * 1000; // Convert to milliseconds
-      return Date.now() >= exp;
+      const isExpired = Date.now() >= exp;
+      
+      // Update cache
+      this.tokenExpiryCache = { token, isExpired, checkedAt: now };
+      
+      return isExpired;
     } catch {
       return true;
     }
+  }
+
+  static hasValidToken(): boolean {
+    const token = this.getAccessToken();
+    if (!token) return false;
+    return !this.isTokenExpired(token);
   }
 }
 
@@ -120,20 +161,20 @@ async function fetchApi(endpoint: string, options?: RequestInit, skipAuth = fals
         });
         
         if (!retryResponse.ok) {
-          throw new Error(`API Error: ${retryResponse.statusText}`);
+          throw new ApiError(`API Error: ${retryResponse.statusText}`, retryResponse.status);
         }
         
         return retryResponse.json();
       } else {
         TokenManager.clearTokens();
         window.location.href = '/';
-        throw new Error('Session expired. Please login again.');
+        throw new ApiError('Session expired. Please login again.', 401);
       }
     }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || `API Error: ${response.statusText}`);
+      throw new ApiError(errorData.detail || `API Error: ${response.statusText}`, response.status, errorData);
     }
 
     return response.json();
@@ -166,6 +207,14 @@ async function refreshAccessToken(): Promise<boolean> {
 }
 
 export const ApiService = {
+  hasValidToken(): boolean {
+    return TokenManager.hasValidToken();
+  },
+
+  isAuthError(error: any): boolean {
+    return isAuthError(error);
+  },
+
   async login(email: string, password: string): Promise<{ user: User; accessToken: string; refreshToken: string } | null> {
     try {
       const response = await fetchApi('/api/auth/login', {
