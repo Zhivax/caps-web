@@ -52,7 +52,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           // Verify token is still valid with backend
           const currentUser = await ApiService.getCurrentUser();
           if (currentUser) {
-            setUser(JSON.parse(savedUser));
+            // Use fresh user data from backend
+            setUser(currentUser);
           } else {
             // Token invalid, clear session
             setUser(null);
@@ -105,7 +106,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       } catch (err) {
         console.error("Failed to fetch data:", err);
         // If data fetch fails with auth error, logout
-        if (err instanceof Error && err.message.includes('Session expired')) {
+        if (ApiService.isAuthError(err)) {
           setUser(null);
           ApiService.logout();
           localStorage.removeItem('sc_user');
@@ -117,7 +118,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, [user]);
 
   useEffect(() => {
-    localStorage.setItem('sc_user', JSON.stringify(user));
+    if (user) {
+      localStorage.setItem('sc_user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('sc_user');
+    }
     localStorage.setItem('sc_umkm_fabrics', JSON.stringify(umkmFabrics));
     localStorage.setItem('sc_notifications', JSON.stringify(notifications));
     localStorage.setItem('sc_usage_history', JSON.stringify(usageHistory));

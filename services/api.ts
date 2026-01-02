@@ -17,6 +17,19 @@ const BASE_URL = (isDevelopment && !disableProxy) ? '' : API_BASE_URL;
 const ACCESS_TOKEN_KEY = 'sc_access_token';
 const REFRESH_TOKEN_KEY = 'sc_refresh_token';
 
+// Custom API Error class
+class ApiError extends Error {
+  constructor(message: string, public statusCode?: number, public details?: any) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+// Check if error is an authentication error
+function isAuthError(error: any): boolean {
+  return error instanceof ApiError && (error.statusCode === 401 || error.statusCode === 403);
+}
+
 // Token management
 class TokenManager {
   static setTokens(accessToken: string, refreshToken: string): void {
@@ -126,20 +139,20 @@ async function fetchApi(endpoint: string, options?: RequestInit, skipAuth = fals
         });
         
         if (!retryResponse.ok) {
-          throw new Error(`API Error: ${retryResponse.statusText}`);
+          throw new ApiError(`API Error: ${retryResponse.statusText}`, retryResponse.status);
         }
         
         return retryResponse.json();
       } else {
         TokenManager.clearTokens();
         window.location.href = '/';
-        throw new Error('Session expired. Please login again.');
+        throw new ApiError('Session expired. Please login again.', 401);
       }
     }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || `API Error: ${response.statusText}`);
+      throw new ApiError(errorData.detail || `API Error: ${response.statusText}`, response.status, errorData);
     }
 
     return response.json();
@@ -174,6 +187,10 @@ async function refreshAccessToken(): Promise<boolean> {
 export const ApiService = {
   hasValidToken(): boolean {
     return TokenManager.hasValidToken();
+  },
+
+  isAuthError(error: any): boolean {
+    return isAuthError(error);
   },
 
   async login(email: string, password: string): Promise<{ user: User; accessToken: string; refreshToken: string } | null> {
