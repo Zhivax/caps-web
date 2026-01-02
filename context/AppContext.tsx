@@ -39,6 +39,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [usageHistory, setUsageHistory] = useState<UsageLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Helper function to clear invalid session
+  const clearInvalidSession = useCallback(() => {
+    setUser(null);
+    ApiService.logout();
+    try {
+      localStorage.removeItem('sc_user');
+    } catch (e) {
+      console.error("Failed to clear localStorage:", e);
+    }
+  }, []);
+
   // Validate session on mount
   useEffect(() => {
     const validateSession = async () => {
@@ -56,29 +67,23 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             setUser(currentUser);
           } else {
             // Token invalid, clear session
-            setUser(null);
-            ApiService.logout();
-            localStorage.removeItem('sc_user');
+            clearInvalidSession();
           }
         } else {
           // No saved session or invalid token
-          setUser(null);
-          ApiService.logout();
-          localStorage.removeItem('sc_user');
+          clearInvalidSession();
         }
       } catch (err) {
         console.error("Session validation failed:", err);
         // Clear invalid session
-        setUser(null);
-        ApiService.logout();
-        localStorage.removeItem('sc_user');
+        clearInvalidSession();
       } finally {
         setIsLoading(false);
       }
     };
     
     validateSession();
-  }, []);
+  }, [clearInvalidSession]);
 
   // Load data when user is authenticated
   useEffect(() => {
@@ -107,9 +112,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         console.error("Failed to fetch data:", err);
         // If data fetch fails with auth error, logout
         if (ApiService.isAuthError(err)) {
-          setUser(null);
-          ApiService.logout();
-          localStorage.removeItem('sc_user');
+          clearInvalidSession();
         }
       }
     };
@@ -118,14 +121,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, [user]);
 
   useEffect(() => {
-    if (user) {
-      localStorage.setItem('sc_user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('sc_user');
+    try {
+      if (user) {
+        localStorage.setItem('sc_user', JSON.stringify(user));
+      } else {
+        localStorage.removeItem('sc_user');
+      }
+      localStorage.setItem('sc_umkm_fabrics', JSON.stringify(umkmFabrics));
+      localStorage.setItem('sc_notifications', JSON.stringify(notifications));
+      localStorage.setItem('sc_usage_history', JSON.stringify(usageHistory));
+    } catch (e) {
+      console.error("Failed to save to localStorage:", e);
     }
-    localStorage.setItem('sc_umkm_fabrics', JSON.stringify(umkmFabrics));
-    localStorage.setItem('sc_notifications', JSON.stringify(notifications));
-    localStorage.setItem('sc_usage_history', JSON.stringify(usageHistory));
   }, [user, umkmFabrics, notifications, usageHistory]);
 
   const addNotification = useCallback((userId: string, title: string, message: string, type: AppNotification['type']) => {
@@ -153,10 +160,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, []);
 
   const logout = useCallback(() => {
-    setUser(null);
-    ApiService.logout();
-    localStorage.removeItem('sc_user');
-  }, []);
+    clearInvalidSession();
+  }, [clearInvalidSession]);
 
   const recordSale = useCallback(async (saleData: Omit<HijabSale, 'id' | 'timestamp'>) => {
     try {

@@ -32,9 +32,14 @@ function isAuthError(error: any): boolean {
 
 // Token management
 class TokenManager {
+  private static tokenExpiryCache: { token: string; isExpired: boolean; checkedAt: number } | null = null;
+  private static readonly CACHE_TTL = 5000; // Cache for 5 seconds
+
   static setTokens(accessToken: string, refreshToken: string): void {
     localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
     localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    // Clear cache when new tokens are set
+    this.tokenExpiryCache = null;
   }
 
   static getAccessToken(): string | null {
@@ -48,15 +53,32 @@ class TokenManager {
   static clearTokens(): void {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
+    this.tokenExpiryCache = null;
   }
 
   static isTokenExpired(token: string): boolean {
+    // Check cache first
+    const now = Date.now();
+    if (
+      this.tokenExpiryCache && 
+      this.tokenExpiryCache.token === token &&
+      now - this.tokenExpiryCache.checkedAt < this.CACHE_TTL
+    ) {
+      return this.tokenExpiryCache.isExpired;
+    }
+
+    // Compute expiry
     try {
       // Client-side expiration check (structure validation only)
       // NOTE: This does NOT verify the signature - server always validates
       const payload = JSON.parse(atob(token.split('.')[1]));
       const exp = payload.exp * 1000; // Convert to milliseconds
-      return Date.now() >= exp;
+      const isExpired = Date.now() >= exp;
+      
+      // Update cache
+      this.tokenExpiryCache = { token, isExpired, checkedAt: now };
+      
+      return isExpired;
     } catch {
       return true;
     }
