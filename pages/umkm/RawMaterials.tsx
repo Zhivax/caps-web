@@ -18,8 +18,8 @@ export const RawMaterials: React.FC = () => {
   
   // Search & Filter State
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('All Materials');
-  const [filterColor, setFilterColor] = useState('All Colors');
+  const [filterType, setFilterType] = useState('Semua Bahan');
+  const [filterColor, setFilterColor] = useState('Semua Warna');
 
   // Modal State
   const [isRestockModalOpen, setIsRestockModalOpen] = useState(false);
@@ -39,20 +39,20 @@ export const RawMaterials: React.FC = () => {
   const filteredMaterials = useMemo(() => {
     return umkmFabrics.filter(uf => {
       const matchesSearch = uf.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesType = filterType === 'All Materials' || uf.name.includes(filterType);
-      const matchesColor = filterColor === 'All Colors' || uf.color === filterColor;
+      const matchesType = filterType === 'Semua Bahan' || uf.name.includes(filterType);
+      const matchesColor = filterColor === 'Semua Warna' || uf.color === filterColor;
       return matchesSearch && matchesType && matchesColor;
     });
   }, [umkmFabrics, searchTerm, filterType, filterColor]);
 
   const availableTypes = useMemo(() => {
-    const relevant = umkmFabrics.filter(uf => filterColor === 'All Colors' || uf.color === filterColor);
-    return ['All Materials', ...new Set(relevant.map(uf => uf.name.split(' ')[0]))]; 
+    const relevant = umkmFabrics.filter(uf => filterColor === 'Semua Warna' || uf.color === filterColor);
+    return ['Semua Bahan', ...new Set(relevant.map(uf => uf.name.split(' ')[0]))]; 
   }, [umkmFabrics, filterColor]);
 
   const availableColors = useMemo(() => {
-    const relevant = umkmFabrics.filter(uf => filterType === 'All Materials' || uf.name.includes(filterType));
-    return ['All Colors', ...new Set(relevant.map(uf => uf.color))];
+    const relevant = umkmFabrics.filter(uf => filterType === 'Semua Bahan' || uf.name.includes(filterType));
+    return ['Semua Warna', ...new Set(relevant.map(uf => uf.color))];
   }, [umkmFabrics, filterType]);
 
   // Production Handlers
@@ -100,9 +100,9 @@ export const RawMaterials: React.FC = () => {
         <div>
           <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-3">
             <Package className="text-slate-900" size={24} />
-            Raw Materials
+            Bahan Baku
           </h3>
-          <p className="text-sm text-slate-500 mt-1 ml-9">Warehouse inventory and production processing center</p>
+          <p className="text-sm text-slate-500 mt-1 ml-9">Inventori gudang dan pusat pemrosesan produksi</p>
         </div>
       </div>
 
@@ -112,7 +112,7 @@ export const RawMaterials: React.FC = () => {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input 
             type="text" 
-            placeholder="Search Raw Material..." 
+            placeholder="Cari Bahan Baku..." 
             className="pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none w-full focus:ring-4 focus:ring-indigo-50 transition-all font-bold text-sm" 
             value={searchTerm} 
             onChange={(e) => setSearchTerm(e.target.value)} 
