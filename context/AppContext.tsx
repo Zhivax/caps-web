@@ -29,11 +29,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('sc_user');
-    return saved ? JSON.parse(saved) : null;
-  });
-  
+  const [user, setUser] = useState<User | null>(null);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
   const [requests, setRequests] = useState<FabricRequest[]>([]);
   const [hijabProducts, setHijabProducts] = useState<HijabProduct[]>([]);
@@ -43,9 +39,51 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [usageHistory, setUsageHistory] = useState<UsageLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Validate session on mount
+  useEffect(() => {
+    const validateSession = async () => {
+      setIsLoading(true);
+      try {
+        // Check if we have a saved user and token
+        const savedUser = localStorage.getItem('sc_user');
+        const hasToken = ApiService.hasValidToken();
+        
+        if (savedUser && hasToken) {
+          // Verify token is still valid with backend
+          const currentUser = await ApiService.getCurrentUser();
+          if (currentUser) {
+            setUser(JSON.parse(savedUser));
+          } else {
+            // Token invalid, clear session
+            setUser(null);
+            ApiService.logout();
+            localStorage.removeItem('sc_user');
+          }
+        } else {
+          // No saved session or invalid token
+          setUser(null);
+          ApiService.logout();
+          localStorage.removeItem('sc_user');
+        }
+      } catch (err) {
+        console.error("Session validation failed:", err);
+        // Clear invalid session
+        setUser(null);
+        ApiService.logout();
+        localStorage.removeItem('sc_user');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    validateSession();
+  }, []);
+
+  // Load data when user is authenticated
   useEffect(() => {
     const initData = async () => {
-      setIsLoading(true);
+      if (!user) return;
+      
       try {
         const [f, r, h, s, uh, uf] = await Promise.all([
           ApiService.getFabrics(),
@@ -66,12 +104,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         if (savedNotifs) setNotifications(JSON.parse(savedNotifs));
       } catch (err) {
         console.error("Failed to fetch data:", err);
-      } finally {
-        setIsLoading(false);
+        // If data fetch fails with auth error, logout
+        if (err instanceof Error && err.message.includes('Session expired')) {
+          setUser(null);
+          ApiService.logout();
+          localStorage.removeItem('sc_user');
+        }
       }
     };
+    
     initData();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     localStorage.setItem('sc_user', JSON.stringify(user));

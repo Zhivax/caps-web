@@ -48,6 +48,12 @@ class TokenManager {
       return true;
     }
   }
+
+  static hasValidToken(): boolean {
+    const token = this.getAccessToken();
+    if (!token) return false;
+    return !this.isTokenExpired(token);
+  }
 }
 
 // Input sanitization utility
@@ -166,6 +172,10 @@ async function refreshAccessToken(): Promise<boolean> {
 }
 
 export const ApiService = {
+  hasValidToken(): boolean {
+    return TokenManager.hasValidToken();
+  },
+
   async login(email: string, password: string): Promise<{ user: User; accessToken: string; refreshToken: string } | null> {
     try {
       const response = await fetchApi('/api/auth/login', {
