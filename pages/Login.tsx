@@ -20,10 +20,10 @@ export const Login: React.FC = () => {
     try {
       const success = await login(email, password);
       if (!success) {
-        setError('Invalid email or password. Please try again.');
+        setError('Email atau kata sandi tidak valid. Silakan coba lagi.');
       }
     } catch (err) {
-      setError('An error occurred during login. Please try again.');
+      setError('Terjadi kesalahan saat login. Silakan coba lagi.');
     } finally {
       setIsLoading(false);
     }
@@ -43,40 +43,40 @@ export const Login: React.FC = () => {
             <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-8">
               <ShieldCheck size={28} className="text-slate-900" />
             </div>
-            <h1 className="text-3xl font-bold mb-3 leading-tight">UMKM SupplyChain Hub</h1>
+            <h1 className="text-3xl font-bold mb-3 leading-tight">Hub SupplyChain UMKM</h1>
             <p className="text-slate-300 text-base leading-relaxed mb-6">
-              Real-time synchronization between Hijab Producers and Fabric Suppliers. Monitor stock, request materials, and grow together.
+              Sinkronisasi real-time antara Produsen Hijab dan Supplier Kain. Monitor stok, permintaan bahan, dan berkembang bersama.
             </p>
             <div className="space-y-2 text-sm text-slate-400">
               <div className="flex items-center">
                 <ShieldCheck size={16} className="mr-2" />
-                <span>JWT Token Authentication</span>
+                <span>Autentikasi Token JWT</span>
               </div>
               <div className="flex items-center">
                 <ShieldCheck size={16} className="mr-2" />
-                <span>Role-Based Access Control</span>
+                <span>Kontrol Akses Berbasis Peran</span>
               </div>
               <div className="flex items-center">
                 <ShieldCheck size={16} className="mr-2" />
-                <span>End-to-End Encryption</span>
+                <span>Enkripsi End-to-End</span>
               </div>
             </div>
           </div>
           <div className="hidden md:block">
-            <p className="text-slate-400 text-xs">© 2024 SupplyChain Integration Platform - Secured</p>
+            <p className="text-slate-400 text-xs">© 2024 Platform Integrasi SupplyChain - Aman</p>
           </div>
         </div>
 
         {/* Form Section */}
         <div className="md:w-1/2 p-8 md:p-12 bg-white">
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-slate-900">Welcome back</h2>
-            <p className="text-slate-500 text-sm mt-1">Sign in to your secure dashboard</p>
+            <h2 className="text-2xl font-semibold text-slate-900">Selamat Datang Kembali</h2>
+            <p className="text-slate-500 text-sm mt-1">Masuk ke dashboard aman Anda</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Email address</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Alamat Email</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
@@ -84,7 +84,7 @@ export const Login: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900"
-                  placeholder="name@example.com"
+                  placeholder="nama@contoh.com"
                   required
                   disabled={isLoading}
                 />
@@ -92,7 +92,7 @@ export const Login: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Kata Sandi</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
@@ -126,13 +126,13 @@ export const Login: React.FC = () => {
               disabled={isLoading}
               className="w-full py-3 bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-800 shadow-soft flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>{isLoading ? 'Signing in...' : 'Sign in'}</span>
+              <span>{isLoading ? 'Masuk...' : 'Masuk'}</span>
               {!isLoading && <ArrowRight size={18} />}
             </button>
           </form>
 
           <div className="mt-8 pt-6 border-t border-slate-200">
-            <p className="text-xs font-medium text-slate-500 mb-3">Demo accounts (password: password123)</p>
+            <p className="text-xs font-medium text-slate-500 mb-3">Akun demo (kata sandi: password123)</p>
             <div className="grid grid-cols-2 gap-3">
               <button 
                 onClick={() => setDemoCredentials('umkm@example.com')}

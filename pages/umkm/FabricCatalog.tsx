@@ -27,12 +27,12 @@ const FabricCard = memo(({ f, onOrder }: { f: Fabric, onOrder: (f: Fabric) => vo
         <span className="text-sm text-slate-600">{f.color}</span>
       </div>
       <span className={`text-xs font-medium px-2 py-0.5 rounded ${f.stock < 50 ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
-          {f.stock}m Available
+          {f.stock}m Tersedia
       </span>
     </div>
     <div className="mt-auto pt-5 border-t border-slate-200 flex items-center justify-between">
       <div>
-        <p className="text-xs text-slate-500 mb-0.5">Price / m</p>
+        <p className="text-xs text-slate-500 mb-0.5">Harga / m</p>
         <p className="font-semibold text-slate-900 text-lg">Rp {f.pricePerUnit.toLocaleString()}</p>
       </div>
       <button onClick={() => onOrder(f)} className="p-3 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors">
@@ -45,30 +45,30 @@ const FabricCard = memo(({ f, onOrder }: { f: Fabric, onOrder: (f: Fabric) => vo
 export const FabricCatalog: React.FC = () => {
   const { fabrics, user, submitRequest } = useApp();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('All Types');
-  const [filterColor, setFilterColor] = useState('All Colors');
-  const [filterSupplier, setFilterSupplier] = useState('All Suppliers');
+  const [filterType, setFilterType] = useState('Semua Jenis');
+  const [filterColor, setFilterColor] = useState('Semua Warna');
+  const [filterSupplier, setFilterSupplier] = useState('Semua Supplier');
   const [selectedFabric, setSelectedFabric] = useState<Fabric | null>(null);
   const [requestQty, setRequestQty] = useState(1);
   const [requestNotes, setRequestNotes] = useState('');
 
   const filteredFabrics = useMemo(() => fabrics.filter(f => {
     const matchesSearch = f.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === 'All Types' || f.type === filterType;
-    const matchesColor = filterColor === 'All Colors' || f.color === filterColor;
-    const matchesSupplier = filterSupplier === 'All Suppliers' || f.supplierName === filterSupplier;
+    const matchesType = filterType === 'Semua Jenis' || f.type === filterType;
+    const matchesColor = filterColor === 'Semua Warna' || f.color === filterColor;
+    const matchesSupplier = filterSupplier === 'Semua Supplier' || f.supplierName === filterSupplier;
     return matchesSearch && matchesType && matchesColor && matchesSupplier;
   }), [fabrics, searchTerm, filterType, filterColor, filterSupplier]);
 
-  const availableTypes = useMemo(() => ['All Types', ...new Set(fabrics.map(f => f.type))], [fabrics]);
-  const availableColors = useMemo(() => ['All Colors', ...new Set(fabrics.map(f => f.color))], [fabrics]);
-  const availableSuppliers = useMemo(() => ['All Suppliers', ...new Set(fabrics.map(f => f.supplierName))], [fabrics]);
+  const availableTypes = useMemo(() => ['Semua Jenis', ...new Set(fabrics.map(f => f.type))], [fabrics]);
+  const availableColors = useMemo(() => ['Semua Warna', ...new Set(fabrics.map(f => f.color))], [fabrics]);
+  const availableSuppliers = useMemo(() => ['Semua Supplier', ...new Set(fabrics.map(f => f.supplierName))], [fabrics]);
 
   const handleRequestSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFabric || !user) return;
     if (requestQty > selectedFabric.stock) {
-      alert('Request quantity exceeds available stock!');
+      alert('Jumlah permintaan melebihi stok yang tersedia!');
       return;
     }
     submitRequest({
@@ -84,7 +84,7 @@ export const FabricCatalog: React.FC = () => {
     setSelectedFabric(null);
     setRequestQty(1);
     setRequestNotes('');
-    alert('Material request submitted to partner.');
+    alert('Permintaan bahan berhasil dikirim ke mitra.');
   };
 
   return (
@@ -93,9 +93,9 @@ export const FabricCatalog: React.FC = () => {
         <div>
           <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-3">
             <CatalogIcon className="text-slate-900" size={24} />
-            Fabric Catalog
+            Katalog Kain
           </h3>
-          <p className="text-sm text-slate-500 mt-1">Browse and order materials from verified partners</p>
+          <p className="text-sm text-slate-500 mt-1">Jelajahi dan pesan bahan dari mitra terverifikasi</p>
         </div>
       </div>
 
@@ -104,7 +104,7 @@ export const FabricCatalog: React.FC = () => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input 
             type="text" 
-            placeholder="Search fabric name..." 
+            placeholder="Cari nama kain..." 
             className="pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-lg outline-none w-full focus:ring-2 focus:ring-slate-900 focus:border-slate-900" 
             value={searchTerm} 
             onChange={(e) => setSearchTerm(e.target.value)} 
@@ -141,7 +141,7 @@ export const FabricCatalog: React.FC = () => {
        {filteredFabrics.length === 0 ? (
          <div className="bg-white rounded-xl border border-dashed border-slate-300 p-20 text-center">
              <Package size={40} className="mx-auto mb-3 text-slate-300" />
-             <p className="text-sm text-slate-500">No fabrics match your search/filters</p>
+             <p className="text-sm text-slate-500">Tidak ada kain yang cocok dengan pencarian/filter Anda</p>
          </div>
        ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -157,7 +157,7 @@ export const FabricCatalog: React.FC = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-md">
           <div className="bg-white/90 backdrop-blur-2xl border border-slate-200 rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="px-8 py-5 bg-slate-900 text-white flex items-center justify-between">
-              <h4 className="font-black text-[10px] uppercase tracking-widest">Order Material</h4>
+              <h4 className="font-black text-[10px] uppercase tracking-widest">Pesan Bahan</h4>
               <button onClick={() => setSelectedFabric(null)} className="p-2 hover:bg-white/20 rounded-full transition-colors"><X size={20} /></button>
             </div>
             
@@ -171,7 +171,7 @@ export const FabricCatalog: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                  <label className="block text-xs font-medium text-slate-400 uppercase tracking-widest ml-1">Quantity (meters)</label>
+                  <label className="block text-xs font-medium text-slate-400 uppercase tracking-widest ml-1">Jumlah (meter)</label>
                   <input 
                       type="number" 
                       min="1" 
@@ -184,7 +184,7 @@ export const FabricCatalog: React.FC = () => {
               </div>
 
               <div className="p-4 bg-slate-50/50 rounded-lg border border-slate-100 flex justify-between items-end">
-                  <p className="text-xs font-medium text-slate-400 uppercase">Grand Total</p>
+                  <p className="text-xs font-medium text-slate-400 uppercase">Total Keseluruhan</p>
                   <p className="text-xl font-black text-slate-900">Rp {(selectedFabric.pricePerUnit * requestQty).toLocaleString()}</p>
               </div>
 
@@ -192,7 +192,7 @@ export const FabricCatalog: React.FC = () => {
                   type="submit"
                   className="w-full py-4 bg-slate-900 text-white rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 shadow-xl shadow-indigo-100 transition-all active:scale-95"
               >
-                  Submit Order
+                  Kirim Pesanan
               </button>
             </form>
           </div>

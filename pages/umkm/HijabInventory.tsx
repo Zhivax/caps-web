@@ -32,7 +32,7 @@ const HijabRow = memo(({ p }: { p: HijabProduct }) => {
           isLow ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'
         }`}>
           {isLow ? <AlertTriangle size={12} className="mr-1.5" /> : <CheckCircle size={12} className="mr-1.5" />}
-          {isLow ? 'Restock Needed' : 'Healthy'}
+          {isLow ? 'Perlu Restock' : 'Sehat'}
         </span>
       </td>
     </tr>
@@ -48,18 +48,18 @@ export const HijabInventory: React.FC = () => {
   const filteredProducts = useMemo(() => {
     return hijabProducts.filter(p => {
       const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesColor = filterColor === 'All Colors' || p.color === filterColor;
+      const matchesColor = filterColor === 'Semua Warna' || p.color === filterColor;
       const isLow = p.stock < p.threshold;
-      const matchesStatus = filterStatus === 'All Status' || 
-                           (filterStatus === 'Good Stock' && !isLow) || 
-                           (filterStatus === 'Low Stock' && isLow);
+      const matchesStatus = filterStatus === 'Semua Status' || 
+                           (filterStatus === 'Stok Baik' && !isLow) || 
+                           (filterStatus === 'Stok Rendah' && isLow);
       
       return matchesSearch && matchesColor && matchesStatus;
     });
   }, [hijabProducts, searchTerm, filterColor, filterStatus]);
 
   const availableColors = useMemo(() => 
-    ['All Colors', ...new Set(hijabProducts.map(p => p.color))]
+    ['Semua Warna', ...new Set(hijabProducts.map(p => p.color))]
   , [hijabProducts]);
 
   return (
@@ -68,9 +68,9 @@ export const HijabInventory: React.FC = () => {
         <div>
           <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-3">
             <Layers className="text-slate-900" size={24} />
-            Hijab Inventory
+            Inventori Hijab
           </h3>
-          <p className="text-sm text-slate-500 mt-1 ml-9">Manage your product stock levels and safety limits</p>
+          <p className="text-sm text-slate-500 mt-1 ml-9">Kelola tingkat stok produk dan batas keamanan Anda</p>
         </div>
       </div>
 
@@ -79,7 +79,7 @@ export const HijabInventory: React.FC = () => {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input 
             type="text" 
-            placeholder="Search Product SKU..." 
+            placeholder="Cari SKU Produk..." 
             className="pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none w-full focus:ring-4 focus:ring-indigo-50 transition-all font-bold text-sm" 
             value={searchTerm} 
             onChange={(e) => setSearchTerm(e.target.value)} 
@@ -98,9 +98,9 @@ export const HijabInventory: React.FC = () => {
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
           >
-            <option value="All Status">All Status</option>
-            <option value="Good Stock">Good Stock</option>
-            <option value="Low Stock">Low Stock</option>
+            <option value="Semua Status">Semua Status</option>
+            <option value="Stok Baik">Stok Baik</option>
+            <option value="Stok Rendah">Stok Rendah</option>
           </select>
         </div>
       </div>
@@ -110,10 +110,10 @@ export const HijabInventory: React.FC = () => {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-slate-50 text-slate-500 text-xs font-medium uppercase tracking-[0.2em] border-b">
-                <th className="px-8 py-5">Product SKU</th>
-                <th className="px-8 py-5">Color Spec</th>
-                <th className="px-8 py-5">Current Stock</th>
-                <th className="px-8 py-5">Safety Limit</th>
+                <th className="px-8 py-5">SKU Produk</th>
+                <th className="px-8 py-5">Spesifikasi Warna</th>
+                <th className="px-8 py-5">Stok Saat Ini</th>
+                <th className="px-8 py-5">Batas Keamanan</th>
                 <th className="px-8 py-5">Status</th>
               </tr>
             </thead>

@@ -16,9 +16,9 @@ export const Requests: React.FC = () => {
   const handleApprove = async (requestId: string) => {
     try {
       await updateRequestStatus(requestId, RequestStatus.APPROVED);
-      alert('Payment approved and stock updated.');
+      alert('Pembayaran disetujui dan stok diperbarui.');
     } catch (err: any) {
-      alert(err.message || 'Approval failed.');
+      alert(err.message || 'Persetujuan gagal.');
     }
   };
 
@@ -29,20 +29,20 @@ export const Requests: React.FC = () => {
         <div>
           <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-3">
             <OrderIcon className="text-slate-900" size={24} />
-            Incoming Orders
+            Pesanan Masuk
           </h3>
-          <p className="text-sm text-slate-500 mt-1 ml-9">Process and verify incoming UMKM requests</p>
+          <p className="text-sm text-slate-500 mt-1 ml-9">Proses dan verifikasi permintaan UMKM yang masuk</p>
         </div>
         <span className="px-5 py-2.5 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium uppercase tracking-widest shadow-sm">
-          {activeRequests.length} ACTIVE BATCHES
+          {activeRequests.length} BATCH AKTIF
         </span>
       </div>
 
       {activeRequests.length === 0 ? (
         <div className="bg-white border border-dashed border-slate-200 rounded-xl p-20 text-center">
           <Clock size={48} className="mx-auto text-slate-200 mb-4" />
-          <h4 className="text-lg font-bold text-slate-400">All clear!</h4>
-          <p className="text-slate-400 text-sm">No new requests for now.</p>
+          <h4 className="text-lg font-bold text-slate-400">Semua selesai!</h4>
+          <p className="text-slate-400 text-sm">Tidak ada permintaan baru untuk saat ini.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6">

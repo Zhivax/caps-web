@@ -103,44 +103,44 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
 
   const menuItems: MenuItem[] = user?.role === UserRole.UMKM 
     ? [
-        { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
+        { id: 'dashboard', label: 'Dasbor', icon: <LayoutDashboard size={20} /> },
         { 
           id: 'fabric-supplier', 
-          label: 'Fabric Supplier', 
+          label: 'Supplier Kain', 
           icon: <Users size={20} />,
           children: [
-            { id: 'catalog', label: 'Fabric Catalog' },
-            { id: 'directory', label: 'Supplier Directory' }
+            { id: 'catalog', label: 'Katalog Kain' },
+            { id: 'directory', label: 'Direktori Supplier' }
           ]
         },
         { 
           id: 'production-stock', 
-          label: 'Production & Stock', 
+          label: 'Produksi & Stok', 
           icon: <Layers size={20} />,
           children: [
-            { id: 'hijab-inv', label: 'Hijab Inventory' },
-            { id: 'raw-materials', label: 'Raw Materials' },
-            { id: 'usage-history', label: 'Usage History' }
+            { id: 'hijab-inv', label: 'Inventori Hijab' },
+            { id: 'raw-materials', label: 'Bahan Baku' },
+            { id: 'usage-history', label: 'Riwayat Penggunaan' }
           ]
         },
-        { id: 'sales', label: 'Sales Management', icon: <BadgeDollarSign size={20} /> },
-        { id: 'history', label: 'Order History', icon: <History size={20} /> },
-        { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },
+        { id: 'sales', label: 'Manajemen Penjualan', icon: <BadgeDollarSign size={20} /> },
+        { id: 'history', label: 'Riwayat Pesanan', icon: <History size={20} /> },
+        { id: 'settings', label: 'Pengaturan', icon: <Settings size={20} /> },
       ]
     : [
-        { id: 'dashboard', label: 'Supplier Dashboard', icon: <LayoutDashboard size={20} /> },
+        { id: 'dashboard', label: 'Dasbor Supplier', icon: <LayoutDashboard size={20} /> },
         { 
           id: 'fabric-mgmt', 
-          label: 'Fabric Management', 
+          label: 'Manajemen Kain', 
           icon: <Package size={20} />,
           children: [
-            { id: 'inventory', label: 'My Inventory' },
-            { id: 'add-fabric', label: 'Add New Fabric' }
+            { id: 'inventory', label: 'Inventori Saya' },
+            { id: 'add-fabric', label: 'Tambah Kain Baru' }
           ]
         },
-        { id: 'requests', label: 'Incoming Orders', icon: <ShoppingCart size={20} /> },
-        { id: 'history', label: 'History', icon: <History size={20} /> },
-        { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },
+        { id: 'requests', label: 'Pesanan Masuk', icon: <ShoppingCart size={20} /> },
+        { id: 'history', label: 'Riwayat', icon: <History size={20} /> },
+        { id: 'settings', label: 'Pengaturan', icon: <Settings size={20} /> },
       ];
 
   useEffect(() => {
@@ -251,7 +251,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium text-sm"
             >
               <LogOut size={18} />
-              <span>Sign out</span>
+              <span>Keluar</span>
             </button>
           </div>
         </div>
@@ -277,13 +277,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               {isNotifOpen && (
                 <div className="absolute right-0 mt-2 w-96 bg-white border border-slate-200 rounded-xl shadow-large overflow-hidden z-[100]">
                   <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
-                    <h4 className="text-sm font-semibold text-slate-900">Notifications</h4>
+                    <h4 className="text-sm font-semibold text-slate-900">Notifikasi</h4>
                   </div>
                   <div className="max-h-96 overflow-y-auto custom-scrollbar">
                     {myNotifications.length === 0 ? (
                       <div className="p-12 text-center text-slate-400">
                         <Bell size={32} className="mx-auto mb-3 opacity-20" />
-                        <p className="text-sm">No notifications</p>
+                        <p className="text-sm">Tidak ada notifikasi</p>
                       </div>
                     ) : (
                       <div className="divide-y divide-slate-100">
