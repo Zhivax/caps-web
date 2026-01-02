@@ -20,7 +20,7 @@ async def add_fabric(fabric: Fabric, current_user: TokenData = Depends(get_curre
     if current_user.role != "SUPPLIER":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only suppliers can add fabrics"
+            detail="Hanya supplier yang dapat menambahkan kain"
         )
     
     fabric.name = InputSanitizer.sanitize_string(fabric.name, 100)
@@ -30,14 +30,14 @@ async def add_fabric(fabric: Fabric, current_user: TokenData = Depends(get_curre
     FABRICS.append(fabric)
     AuditLogger.log_sensitive_operation(current_user.user_id, "ADD_FABRIC", fabric.id)
     
-    return {"message": "Fabric added successfully", "fabric": fabric}
+    return {"message": "Kain berhasil ditambahkan", "fabric": fabric}
 
 @router.get("/{fabric_id}", response_model=Fabric)
 async def get_fabric(fabric_id: str, current_user: TokenData = Depends(get_current_active_user)):
     """Get single fabric by ID"""
     fabric = next((f for f in FABRICS if f.id == fabric_id), None)
     if not fabric:
-        raise HTTPException(status_code=404, detail="Fabric not found")
+        raise HTTPException(status_code=404, detail="Kain tidak ditemukan")
     return fabric
 
 @router.patch("/{fabric_id}")
@@ -50,17 +50,17 @@ async def update_fabric(
     if current_user.role != "SUPPLIER":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only suppliers can update fabrics"
+            detail="Hanya supplier yang dapat memperbarui kain"
         )
     
     fabric = next((f for f in FABRICS if f.id == fabric_id), None)
     if not fabric:
-        raise HTTPException(status_code=404, detail="Fabric not found")
+        raise HTTPException(status_code=404, detail="Kain tidak ditemukan")
     
     if fabric.supplierId != current_user.user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You can only update your own fabrics"
+            detail="Anda hanya dapat memperbarui kain Anda sendiri"
         )
     
     if updates.stock is not None:
@@ -70,4 +70,4 @@ async def update_fabric(
     
     AuditLogger.log_sensitive_operation(current_user.user_id, "UPDATE_FABRIC", fabric.id)
     
-    return {"message": "Fabric updated successfully", "fabric": fabric}
+    return {"message": "Kain berhasil diperbarui", "fabric": fabric}

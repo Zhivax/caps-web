@@ -23,7 +23,7 @@ async def create_request(
     if current_user.role != "UMKM":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only UMKM users can create requests"
+            detail="Hanya pengguna UMKM yang dapat membuat permintaan"
         )
     
     request_data.umkmName = InputSanitizer.sanitize_string(request_data.umkmName, 100)
@@ -33,7 +33,7 @@ async def create_request(
     REQUESTS.insert(0, request_data)
     AuditLogger.log_sensitive_operation(current_user.user_id, "CREATE_REQUEST", request_data.id)
     
-    return {"message": "Request created successfully", "request": request_data}
+    return {"message": "Permintaan berhasil dibuat", "request": request_data}
 
 @router.patch("/{request_id}/status")
 async def update_request_status(
@@ -44,31 +44,31 @@ async def update_request_status(
     """Update request status with backend stock validation"""
     request = next((r for r in REQUESTS if r.id == request_id), None)
     if not request:
-        raise HTTPException(status_code=404, detail="Request not found")
+        raise HTTPException(status_code=404, detail="Permintaan tidak ditemukan")
     
     # Permission checks
     if current_user.role == "SUPPLIER":
         if update.status not in ["APPROVED", "REJECTED", "SHIPPED"]:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Suppliers can only approve, reject, or ship requests"
+                detail="Supplier hanya dapat menyetujui, menolak, atau mengirim permintaan"
             )
         if request.supplierId != current_user.user_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="You can only update requests for your fabrics"
+                detail="Anda hanya dapat memperbarui permintaan untuk kain Anda"
             )
         
         # Backend validation for approval
         if update.status == "APPROVED":
             fabric = next((f for f in FABRICS if f.id == request.fabricId), None)
             if not fabric:
-                raise HTTPException(status_code=404, detail="Fabric not found")
+                raise HTTPException(status_code=404, detail="Kain tidak ditemukan")
             
             if fabric.stock < request.quantity:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Insufficient fabric stock. Available: {fabric.stock}m, Requested: {request.quantity}m"
+                    detail=f"Stok kain tidak mencukupi. Tersedia: {fabric.stock}m, Diminta: {request.quantity}m"
                 )
             
             # Backend calculation - deduct stock
@@ -83,12 +83,12 @@ async def update_request_status(
         if update.status not in ["COMPLETED", "CANCELLED"]:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="UMKM can only complete or cancel requests"
+                detail="UMKM hanya dapat menyelesaikan atau membatalkan permintaan"
             )
         if request.umkmId != current_user.user_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="You can only update your own requests"
+                detail="Anda hanya dapat memperbarui permintaan Anda sendiri"
             )
     
     request.status = update.status
@@ -98,4 +98,4 @@ async def update_request_status(
         f"{request_id}:{update.status}"
     )
     
-    return {"message": "Request status updated successfully", "request": request}
+    return {"message": "Status permintaan berhasil diperbarui", "request": request}
