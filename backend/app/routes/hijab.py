@@ -25,7 +25,7 @@ async def upsert_hijab_product(
     if current_user.role != "UMKM":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only UMKM users can manage products"
+            detail="Hanya pengguna UMKM yang dapat mengelola produk"
         )
     
     product.name = InputSanitizer.sanitize_string(product.name, 100)
@@ -36,11 +36,11 @@ async def upsert_hijab_product(
         idx = HIJAB_PRODUCTS.index(existing)
         HIJAB_PRODUCTS[idx] = product
         AuditLogger.log_sensitive_operation(current_user.user_id, "UPDATE_PRODUCT", product.id)
-        return {"message": "Product updated successfully", "product": product}
+        return {"message": "Produk berhasil diperbarui", "product": product}
     else:
         HIJAB_PRODUCTS.append(product)
         AuditLogger.log_sensitive_operation(current_user.user_id, "CREATE_PRODUCT", product.id)
-        return {"message": "Product created successfully", "product": product}
+        return {"message": "Produk berhasil dibuat", "product": product}
 
 @router.get("/sales", response_model=List[HijabSale])
 async def get_sales(current_user: TokenData = Depends(get_current_active_user)):
@@ -48,7 +48,7 @@ async def get_sales(current_user: TokenData = Depends(get_current_active_user)):
     if current_user.role != "UMKM":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only UMKM users can view sales"
+            detail="Hanya pengguna UMKM yang dapat melihat penjualan"
         )
     return SALES
 
@@ -61,18 +61,18 @@ async def record_sale(
     if current_user.role != "UMKM":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only UMKM users can record sales"
+            detail="Hanya pengguna UMKM yang dapat mencatat penjualan"
         )
     
     # Backend validation
     product = next((p for p in HIJAB_PRODUCTS if p.id == sale_request.productId), None)
     if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
+        raise HTTPException(status_code=404, detail="Produk tidak ditemukan")
     
     if product.stock < sale_request.quantity:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Insufficient stock. Available: {product.stock}, Requested: {sale_request.quantity}"
+            detail=f"Stok tidak mencukupi. Tersedia: {product.stock}, Diminta: {sale_request.quantity}"
         )
     
     # Backend calculation

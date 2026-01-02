@@ -16,18 +16,18 @@ export const Settings: React.FC = () => {
 
       <div className="text-center space-y-3 max-w-md">
         <h3 className="text-xl font-semibold text-slate-900">
-          Platform Configuration
+          Konfigurasi Platform
         </h3>
         <div className="flex items-center justify-center gap-2">
           <span className="px-3 py-1.5 bg-slate-900 text-white text-xs font-medium rounded-lg flex items-center gap-2">
-            <Rocket size={14} /> Coming Soon
+            <Rocket size={14} /> Segera Hadir
           </span>
           <span className="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-medium rounded-lg flex items-center gap-2">
-            <Clock size={14} /> In Development
+            <Clock size={14} /> Dalam Pengembangan
           </span>
         </div>
         <p className="text-sm text-slate-500 leading-relaxed px-6">
-          We are building a robust preference engine to help you customize your supply chain experience. This feature will be available in the next major update.
+          Kami sedang membangun mesin preferensi yang kuat untuk membantu Anda menyesuaikan pengalaman rantai pasokan Anda. Fitur ini akan tersedia dalam pembaruan utama berikutnya.
         </p>
       </div>
 

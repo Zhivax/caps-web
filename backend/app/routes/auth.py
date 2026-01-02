@@ -34,7 +34,7 @@ async def login(request: Request, login_data: LoginRequest):
             AuditLogger.log_authentication("unknown", login_data.email, False, request.client.host)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid email or password"
+                detail="Email atau kata sandi tidak valid"
             )
         
         # Verify password
@@ -42,7 +42,7 @@ async def login(request: Request, login_data: LoginRequest):
             AuditLogger.log_authentication(user.id, user.email, False, request.client.host)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid email or password"
+                detail="Email atau kata sandi tidak valid"
             )
         
         # Create tokens
@@ -80,7 +80,7 @@ async def login(request: Request, login_data: LoginRequest):
         logger.error(f"Login error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error during login"
+            detail="Kesalahan server internal saat login"
         )
 
 
@@ -115,7 +115,7 @@ async def refresh_token(request: Request, refresh_data: RefreshTokenRequest):
         logger.error(f"Token refresh error: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid refresh token"
+            detail="Token refresh tidak valid"
         )
 
 
@@ -124,7 +124,7 @@ async def get_current_user_info(current_user: TokenData = Depends(get_current_ac
     """Get current authenticated user information"""
     user = next((u for u in USERS if u.id == current_user.user_id), None)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="Pengguna tidak ditemukan")
     
     return UserResponse(
         id=user.id,

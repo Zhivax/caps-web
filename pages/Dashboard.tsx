@@ -64,10 +64,10 @@ export const Dashboard: React.FC = () => {
       <div>
         <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-3">
           <LayoutDashboard className="text-slate-900" size={24} />
-          {isUMKM ? 'Dashboard' : 'Supplier Dashboard'}
+          {isUMKM ? 'Dasbor' : 'Dasbor Supplier'}
         </h3>
         <p className="text-sm text-slate-500 mt-1">
-          {isUMKM ? 'Overview of your supply chain performance' : 'Monitor warehouse levels and partnerships'}
+          {isUMKM ? 'Gambaran umum kinerja rantai pasokan Anda' : 'Monitor level gudang dan kemitraan'}
         </p>
       </div>
     </div>
@@ -84,10 +84,10 @@ export const Dashboard: React.FC = () => {
         {renderHeader()}
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard title="Total Hijab Stock" value={totalHijabStock} icon={<Package size={18} />} trend="+12%" trendUp color="bg-slate-900" />
-          <StatCard title="Active Suppliers" value={activeSuppliers} icon={<Users size={18} />} color="bg-blue-600" />
-          <StatCard title="Active Requests" value={pendingRequests} icon={<Clock size={18} />} trend="-2" trendUp={false} color="bg-amber-500" />
-          <StatCard title="Low Stock Items" value={lowStockAlerts} icon={<AlertTriangle size={18} />} color="bg-red-600" />
+          <StatCard title="Total Stok Hijab" value={totalHijabStock} icon={<Package size={18} />} trend="+12%" trendUp color="bg-slate-900" />
+          <StatCard title="Supplier Aktif" value={activeSuppliers} icon={<Users size={18} />} color="bg-blue-600" />
+          <StatCard title="Permintaan Aktif" value={pendingRequests} icon={<Clock size={18} />} trend="-2" trendUp={false} color="bg-amber-500" />
+          <StatCard title="Item Stok Rendah" value={lowStockAlerts} icon={<AlertTriangle size={18} />} color="bg-red-600" />
         </div>
 
         <ViewportAware placeholderHeight="400px" className="bg-white p-6 rounded-xl border border-slate-200 shadow-soft">
@@ -98,7 +98,7 @@ export const Dashboard: React.FC = () => {
 
         <ViewportAware placeholderHeight="300px" className="bg-white p-6 rounded-xl border border-slate-200 shadow-soft">
            <h4 className="text-sm font-semibold text-slate-900 mb-6 flex items-center">
-              <ClockIcon size={18} className="mr-2 text-amber-500" /> Fabric Catalog Status
+              <ClockIcon size={18} className="mr-2 text-amber-500" /> Status Katalog Kain
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {fabrics.slice(0, 9).map(f => (
@@ -110,7 +110,7 @@ export const Dashboard: React.FC = () => {
                   <div className="text-right shrink-0 ml-4">
                     <p className="text-sm font-semibold text-slate-900">{f.stock}m</p>
                     <span className={`text-xs font-medium px-2 py-0.5 rounded ${f.stock > 20 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                      {f.stock > 20 ? 'In Stock' : 'Limited'}
+                      {f.stock > 20 ? 'Tersedia' : 'Terbatas'}
                     </span>
                   </div>
                 </div>
@@ -131,24 +131,24 @@ export const Dashboard: React.FC = () => {
         {renderHeader()}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard title="Material Types" value={myFabrics.length} icon={<Package size={18} />} color="bg-slate-900" />
-          <StatCard title="Total Ready Stock" value={`${totalStock}m`} icon={<TrendingUp size={18} />} trend="+450m" trendUp color="bg-green-600" />
-          <StatCard title="New Orders" value={incomingRequests} icon={<ShoppingCart size={18} />} trend="+2" trendUp color="bg-amber-500" />
-          <StatCard title="Order History" value={myRequests.length} icon={<HistoryIcon size={18} />} color="bg-slate-700" />
+          <StatCard title="Jenis Bahan" value={myFabrics.length} icon={<Package size={18} />} color="bg-slate-900" />
+          <StatCard title="Total Stok Siap" value={`${totalStock}m`} icon={<TrendingUp size={18} />} trend="+450m" trendUp color="bg-green-600" />
+          <StatCard title="Pesanan Baru" value={incomingRequests} icon={<ShoppingCart size={18} />} trend="+2" trendUp color="bg-amber-500" />
+          <StatCard title="Riwayat Pesanan" value={myRequests.length} icon={<HistoryIcon size={18} />} color="bg-slate-700" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ViewportAware placeholderHeight="400px" className="bg-white p-6 rounded-xl border border-slate-200 shadow-soft">
             <div className="flex items-center justify-between mb-6">
-              <h4 className="text-sm font-semibold text-slate-900">Incoming Fabric Requests</h4>
+              <h4 className="text-sm font-semibold text-slate-900">Permintaan Kain Masuk</h4>
               {myRequests.filter(r => r.status === RequestStatus.PENDING).length > 0 && (
-                <span className="px-2.5 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-md">Action Required</span>
+                <span className="px-2.5 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-md">Perlu Tindakan</span>
               )}
             </div>
             {myRequests.filter(r => r.status === RequestStatus.PENDING).length === 0 ? (
               <div className="text-center py-20 bg-slate-50 rounded-lg border border-dashed border-slate-300">
                 <ClockIcon size={40} className="mx-auto mb-3 text-slate-300" />
-                <p className="text-sm text-slate-500">No pending requests</p>
+                <p className="text-sm text-slate-500">Tidak ada permintaan tertunda</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -156,11 +156,11 @@ export const Dashboard: React.FC = () => {
                   <div key={r.id} className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
                     <div>
                       <p className="text-sm font-medium text-slate-900">{r.umkmName}</p>
-                      <p className="text-xs text-slate-500">Requesting {r.quantity}m of {r.fabricName}</p>
+                      <p className="text-xs text-slate-500">Meminta {r.quantity}m {r.fabricName}</p>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-xs text-slate-400">{new Date(r.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      <button className="px-4 py-2 bg-slate-900 text-white text-xs font-medium rounded-lg hover:bg-slate-800 transition-colors">Details</button>
+                      <button className="px-4 py-2 bg-slate-900 text-white text-xs font-medium rounded-lg hover:bg-slate-800 transition-colors">Detail</button>
                     </div>
                   </div>
                 ))}
@@ -169,7 +169,7 @@ export const Dashboard: React.FC = () => {
           </ViewportAware>
 
           <ViewportAware placeholderHeight="400px" className="bg-white p-6 rounded-xl border border-slate-200 shadow-soft">
-            <h4 className="text-sm font-semibold text-slate-900 mb-6">Warehouse Inventory Status</h4>
+            <h4 className="text-sm font-semibold text-slate-900 mb-6">Status Inventori Gudang</h4>
             <div className="space-y-5">
               {myFabrics.map(f => (
                 <div key={f.id} className="space-y-2">
