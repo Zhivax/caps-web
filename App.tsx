@@ -37,7 +37,7 @@ const Main: React.FC = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'dashboard': return <Dashboard />;
+      case 'dashboard': return <Dashboard onNavigate={handleTabChange} />;
       case 'catalog': return <FabricCatalog />;
       case 'directory': return <SupplierDirectory />;
       case 'hijab-inv': return <HijabInventory />;
@@ -49,7 +49,7 @@ const Main: React.FC = () => {
       case 'requests': return <SupplierRequests />;
       case 'history': return <History />;
       case 'settings': return <Settings />;
-      default: return <Dashboard />;
+      default: return <Dashboard onNavigate={handleTabChange} />;
     }
   };
 

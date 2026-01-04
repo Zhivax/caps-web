@@ -76,7 +76,7 @@ export const INITIAL_FABRICS: Fabric[] = [
 
 export const INITIAL_HIJAB_STOCK: HijabProduct[] = [
   { id: 'h1', umkmId: 'u1', name: 'Segiempat Voal', color: 'Dusty Rose', stock: 50, threshold: 20, fabricId: 'f1' },
-  { id: 'h2', umkmId: 'u1', name: 'Pashmina Silk', color: 'Champagne', stock: 15, threshold: 20, fabricId: 'f2' }
+  { id: 'h2', umkmId: 'u1', name: 'Pashmina Silk', color: 'Champagne', stock: 15, threshold: 20, fabricId: 'f3' }
 ];
 
 export const INITIAL_REQUESTS: FabricRequest[] = [
