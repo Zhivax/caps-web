@@ -167,6 +167,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       addNotification(req.umkmId, 'Payment Verified!', `Order #${req.id.slice(-4)} verified. Supplier will ship soon.`, 'success');
     }
 
+    // Restore stock when cancelling/rejecting an approved or shipped order
+    // Stock should only be restored if it was previously deducted (APPROVED or SHIPPED status)
+    if ((status === RequestStatus.CANCELLED || status === RequestStatus.REJECTED) && 
+        (req.status === RequestStatus.APPROVED || req.status === RequestStatus.SHIPPED)) {
+      const fabric = fabrics.find(f => f.id === req.fabricId);
+      if (fabric) {
+        const restoredStock = fabric.stock + req.quantity;
+        await ApiService.updateFabric(fabric.id, { stock: restoredStock });
+        setFabrics(prev => prev.map(f => f.id === fabric.id ? { ...f, stock: restoredStock } : f));
+        addNotification(req.supplierId, 'Stock Restored', `${req.quantity}m of ${req.fabricName} returned to inventory due to ${status === RequestStatus.CANCELLED ? 'void' : 'rejection'}.`, 'info');
+      }
+    }
+
     await ApiService.updateRequestStatus(requestId, status);
     setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status } : r));
 
