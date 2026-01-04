@@ -45,7 +45,11 @@ const StatCard: React.FC<{
   </div>
 ));
 
-export const Dashboard: React.FC = () => {
+interface DashboardProps {
+  onNavigate?: (tab: string) => void;
+}
+
+export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const { user, fabrics, requests, hijabProducts, isLoading } = useApp();
 
   const isUMKM = user?.role === UserRole.UMKM;
@@ -160,7 +164,12 @@ export const Dashboard: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-4">
                       <span className="text-[10px] font-black text-slate-300 uppercase">{new Date(r.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      <button className="px-5 py-2.5 bg-indigo-600 text-white text-[10px] font-black rounded-xl uppercase tracking-widest hover:bg-indigo-700 shadow-lg shadow-indigo-100">Details</button>
+                      <button 
+                        onClick={() => onNavigate && onNavigate('requests')}
+                        className="px-5 py-2.5 bg-indigo-600 text-white text-[10px] font-black rounded-xl uppercase tracking-widest hover:bg-indigo-700 shadow-lg shadow-indigo-100"
+                      >
+                        Details
+                      </button>
                     </div>
                   </div>
                 ))}
